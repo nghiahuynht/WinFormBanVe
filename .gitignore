@@ -22,6 +22,5 @@ bin-release/
 /WinApp/Properties
 *.json
 *.user
-*.sln
 /WinApp/App.config
 *.7z
