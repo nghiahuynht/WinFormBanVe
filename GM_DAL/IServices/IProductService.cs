@@ -10,9 +10,6 @@ namespace GM_DAL.IServices
 {
     public interface IProductService
     {
-        Task<APIResultObject<ResCommon>> SaveProduct(ProductItemModel model, string userName);
-        Task<APIResultObject<ResCommon>> DeleteProduct(int productId, string userName);
-        DataTableResultModel<ProductItemModel> SearchProduct(ProductFilterModel filter);
-        APIResultObject<List<ComboboxModel>> GetAllCategory();
+
     }
 }
