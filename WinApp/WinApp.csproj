@@ -62,4 +62,8 @@
     <ProjectReference Include="..\GM_DAL\GM_DAL.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="imgs\" />
+  </ItemGroup>
+
 </Project>
