@@ -34,12 +34,18 @@ namespace WinApp
 
             if (authenExists == null)
             {
+
+               // var mainForm = ServiceProvider!.GetRequiredService<LoginForm>();
                 var mainForm = ServiceProvider!.GetRequiredService<FormBanVe>();
+
+                
+
                 Application.Run(mainForm);
             }
             else
             {
-                var mainForm = ServiceProvider!.GetRequiredService<FormBanVe>();
+              //  var mainForm = ServiceProvider!.GetRequiredService<FormBanVe>();
+                var mainForm = ServiceProvider!.GetRequiredService<FormTest>();
                 Application.Run(mainForm);
             }
         }
@@ -57,6 +63,7 @@ namespace WinApp
             services.AddSingleton<ICustomerVIPService, CustomerVIPService>();
             services.AddTransient<FormBanVe>();
             services.AddTransient<LoginForm>();
+            services.AddTransient<FormTest>();
             services.AddTransient<PrintReview>();
             services.AddTransient<change_uspass>();
 

@@ -20,13 +20,6 @@ namespace WinApp
             InitializeComponent();
             this.orderId = orderId;
 
-
-            
-
-
-           
-
-
         }
 
         private async void PrintReview_Load(object sender, EventArgs e)
