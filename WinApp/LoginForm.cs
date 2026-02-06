@@ -95,31 +95,16 @@ namespace WinApp
                     }
                     else
                     {
-                        if (loginRes.data.loginCount > 0)
+                        using (StreamWriter writetext = new StreamWriter(loginFile))
                         {
-                            using (StreamWriter writetext = new StreamWriter(loginFile))
-                            {
-                                string jsonString = JsonConvert.SerializeObject(loginRes.data);
-                                writetext.WriteLine(jsonString);
-                                writetext.Close();
-                                writetext.Dispose();
+                            string jsonString = JsonConvert.SerializeObject(loginRes.data);
+                            writetext.WriteLine(jsonString);
+                            writetext.Close();
+                            writetext.Dispose();
 
-                                this.Hide(); // tắt form login, mở form bán vé
-                                FormBanVe formBan = new FormBanVe();
-                                formBan.ShowDialog() ;
-                            }
-                        }
-                        else // login lần đầu
-                        {
-                            MessageBox.Show("Đây là lần đăng nhập đầu tiên, bạn bắt buộc phải đổi mật khẩu !");
-                            string us = loginRes.data.userName.ToString();
                             this.Hide(); // tắt form login, mở form bán vé
-                            change_uspass cp = new change_uspass();
-                             cp.giatriUS = us;
-                             cp.ShowDialog();
-                           
-                            //change_uspass changepassForm = new change_uspass();
-                            //changepassForm.Show();
+                            FormBanVe formBan = new FormBanVe();
+                            formBan.ShowDialog();
                         }
                     }
                 }

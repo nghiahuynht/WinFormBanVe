@@ -26,12 +26,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="GM_DAL">
-      <HintPath>..\GM_DAL\bin\Debug\net6.0\GM_DAL.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
-  <ItemGroup>
     <Compile Update="Properties\Resources.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -58,8 +52,13 @@
     <None Include="D:\Projects\OnGit\Karaoke_BaoHan\WinApp\.editorconfig" />
   </ItemGroup>
 
+  <!-- Chỉ giữ lại ProjectReference -->
   <ItemGroup>
     <ProjectReference Include="..\GM_DAL\GM_DAL.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="imgs\" />
   </ItemGroup>
 
 </Project>

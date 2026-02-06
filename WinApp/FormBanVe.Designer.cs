@@ -124,9 +124,9 @@
             label2.AutoSize = true;
             label2.Location = new Point(122, 35);
             label2.Name = "label2";
-            label2.Size = new Size(264, 20);
+            label2.Size = new Size(268, 20);
             label2.TabIndex = 0;
-            label2.Text = "DANH SÁCH ĐƠN HÀNG ĐANG BÁN :";
+            label2.Text = "DANH SÁCH ĐƠN HÀNG ĐANG BÁN  :";
             // 
             // groupBox2
             // 
