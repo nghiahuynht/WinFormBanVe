@@ -59,7 +59,6 @@ namespace WinApp
 
         private void FormBanVe_Shown(object sender, EventArgs e)
         {
-            // Clear focus sau khi form hiện hoàn toàn (combo sẽ không còn vệt focus xám)
             BeginInvoke(new Action(() =>
             {
                 this.ActiveControl = null;
@@ -132,23 +131,36 @@ namespace WinApp
             txtkhachdua.Minimum = 0;
             txtkhachdua.Maximum = 1000000000;
             txtkhachdua.Increment = 1000;
+
+            txtkhuyenmai.DecimalPlaces = 0;
+            txtkhuyenmai.ThousandsSeparator = true;
+            txtkhuyenmai.Minimum = 0;
+            txtkhuyenmai.Maximum = 100;
+            txtkhuyenmai.Increment = 1;
         }
 
         private void FormBanVe_Load(object sender, EventArgs e)
         {
-            // ✅ init grid + load dữ liệu như cũ
             InitMenuGrid();
             LoadMenuLikeImage();
             LoadLoaiKhachComboBox();
 
-            // tránh gắn event nhiều lần
             cb_loaikhach.SelectionChangeCommitted -= cb_loaikhach_SelectionChangeCommitted;
             cb_loaikhach.SelectionChangeCommitted += cb_loaikhach_SelectionChangeCommitted;
 
             load_cus_theo_style();
 
-            // ✅ build giao diện card giống mock (UI only)
             BuildModernCardLayout();
+
+            // ✅ bật lại chức năng chuyển theme (xanh/nâu)
+            rad_xanh.CheckedChanged -= ThemeRadio_CheckedChanged;
+            rad_nau.CheckedChanged -= ThemeRadio_CheckedChanged;
+            rad_xanh.CheckedChanged += ThemeRadio_CheckedChanged;
+            rad_nau.CheckedChanged += ThemeRadio_CheckedChanged;
+
+            // mặc định tone xanh
+            if (!rad_xanh.Checked && !rad_nau.Checked) rad_xanh.Checked = true;
+            ApplyThemePalette();
 
             this.ActiveControl = null;
         }
@@ -233,7 +245,6 @@ namespace WinApp
             gvMenu.ColumnHeadersDefaultCellStyle.ForeColor = Color.Black;
             gvMenu.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
 
-            // chặn xanh hệ thống
             gvMenu.DefaultCellStyle.Font = new Font("Segoe UI", 10F, FontStyle.Regular);
             gvMenu.DefaultCellStyle.SelectionBackColor = Color.WhiteSmoke;
             gvMenu.DefaultCellStyle.SelectionForeColor = Color.Black;
@@ -278,7 +289,7 @@ namespace WinApp
                 return;
             }
 
-            var tRes = _ticketService.toanbo(); // sp_ListAllTicket
+            var tRes = _ticketService.toanbo();
             if (tRes?.data == null)
             {
                 MessageBox.Show(tRes?.message?.exMessage ?? "Không lấy được Ticket!");
@@ -398,9 +409,6 @@ namespace WinApp
             }
         }
 
-        // ==========================================================
-        // ✅ CHỈ THÊM HÀM NÀY (KHÔNG ĐỔI LOGIC HIỆN TẠI)
-        // ==========================================================
         private TicketModel laythongtinve(string mave)
         {
             if (string.IsNullOrWhiteSpace(mave))
@@ -541,31 +549,114 @@ namespace WinApp
         private Panel _header;
         private TableLayoutPanel _mainGrid;
 
-        // ✅ mới: label Kiểu in để dời xuống card NHẬP SỐ
+        // label Kiểu in
         private Label _lblKieuIn;
 
-        private readonly Color _bg = Color.FromArgb(246, 248, 252);
-        private readonly Color _card = Color.White;
-        private readonly Color _border = Color.FromArgb(226, 232, 240);
-        private readonly Color _text = Color.FromArgb(15, 23, 42);
-        private readonly Color _muted = Color.FromArgb(100, 116, 139);
+        // label "Khách đưa" (đặt dưới "Tiền khuyến mãi")
+        private Label _lblKhachDua;
+
+        // theme state
+        private bool _coffeeMode = false;
+
+        // BLUE palette (default)
+        private readonly Color _bgBlue = Color.FromArgb(246, 248, 252);
+        private readonly Color _cardBlue = Color.White;
+        private readonly Color _borderBlue = Color.FromArgb(226, 232, 240);
+        private readonly Color _textBlue = Color.FromArgb(15, 23, 42);
+        private readonly Color _mutedBlue = Color.FromArgb(100, 116, 139);
         private readonly Color _blue1 = Color.FromArgb(37, 99, 235);
         private readonly Color _blue2 = Color.FromArgb(29, 78, 216);
 
+        // COFFEE palette
+        private readonly Color _bgCoffee = Color.FromArgb(248, 245, 242);
+        private readonly Color _cardCoffee = Color.White;
+        private readonly Color _borderCoffee = Color.FromArgb(229, 222, 215);
+        private readonly Color _textCoffee = Color.FromArgb(35, 24, 18);
+        private readonly Color _mutedCoffee = Color.FromArgb(128, 110, 96);
+        private readonly Color _coffee1 = Color.FromArgb(111, 78, 55);
+        private readonly Color _coffee2 = Color.FromArgb(74, 49, 35);
+
+        // current (will swap by theme)
+        private Color _bg, _card, _border, _text, _muted, _accent1, _accent2;
+
         private Font F(float size, bool bold = false)
             => new Font("Segoe UI", size, bold ? FontStyle.Bold : FontStyle.Regular, GraphicsUnit.Point);
+
+        private void ThemeRadio_CheckedChanged(object sender, EventArgs e)
+        {
+            if (rad_nau.Checked) _coffeeMode = true;
+            else if (rad_xanh.Checked) _coffeeMode = false;
+
+            ApplyThemePalette();
+        }
+
+        private void ApplyThemePalette()
+        {
+            // set palette
+            if (_coffeeMode)
+            {
+                _bg = _bgCoffee;
+                _card = _cardCoffee;
+                _border = _borderCoffee;
+                _text = _textCoffee;
+                _muted = _mutedCoffee;
+                _accent1 = _coffee1;
+                _accent2 = _coffee2;
+            }
+            else
+            {
+                _bg = _bgBlue;
+                _card = _cardBlue;
+                _border = _borderBlue;
+                _text = _textBlue;
+                _muted = _mutedBlue;
+                _accent1 = _blue1;
+                _accent2 = _blue2;
+            }
+
+            // apply to form
+            this.BackColor = _bg;
+
+            // header gradient
+            if (_header is GradientPanel gp)
+            {
+                gp.SetColors(_accent2, _accent1);
+                gp.Invalidate();
+            }
+
+            // header text
+            if (label9 != null)
+            {
+                label9.BackColor = Color.Transparent;
+                label9.ForeColor = Color.White;
+            }
+            if (label1 != null)
+            {
+                label1.BackColor = Color.Transparent;
+                label1.ForeColor = Color.White;
+            }
+
+            // update dynamic labels colors
+            if (_lblKieuIn != null) _lblKieuIn.ForeColor = _muted;
+            if (_lblKhachDua != null) _lblKhachDua.ForeColor = _muted;
+
+            // restyle controls (buttons/grid/etc.)
+            ApplyModernStyles();
+        }
 
         private void BuildModernCardLayout()
         {
             if (_mainGrid != null) return;
 
-            this.BackColor = _bg;
+            // init current palette (blue default)
+            _coffeeMode = rad_nau != null && rad_nau.Checked;
+            ApplyThemePalette();
 
             groupBox1.Visible = false;
             groupBox2.Visible = false;
 
             // ===== HEADER =====
-            _header = new GradientPanel(_blue2, _blue1)
+            _header = new GradientPanel(_accent2, _accent1)
             {
                 Dock = DockStyle.Top,
                 Height = 66,
@@ -574,23 +665,38 @@ namespace WinApp
             this.Controls.Add(_header);
             _header.BringToFront();
 
-            // ✅ FIX: ĐẨY LABEL9 LÊN (không đổi logic nào khác)
-            // Label9 đang nằm trên Form nhưng bị _header che => đưa label9 vào _header
+            // ✅ đưa label9 lên header
             if (label9 != null)
             {
                 label9.Parent = _header;
                 label9.AutoSize = true;
-                label9.BackColor = Color.Transparent;  // ăn gradient
-                label9.ForeColor = Color.White;        // nổi trên nền xanh
-                label9.Location = new Point(18, 20);   // góc trái header
+                label9.BackColor = Color.Transparent;
+                label9.ForeColor = Color.White;
+                label9.Font = F(11, true);
+                label9.Location = new Point(18, 20);
                 label9.BringToFront();
             }
 
-            // (giữ nguyên như bạn đang comment pictureBox2)
-            // pictureBox2.Parent = _header;
-            // pictureBox2.Location = new Point(18, 12);
-            // pictureBox2.SizeMode = PictureBoxSizeMode.Zoom;
-            // pictureBox2.BackColor = Color.Transparent;
+            // ✅ đưa radio tone lên header (để không mất chức năng)
+            if (rad_xanh != null)
+            {
+                rad_xanh.Parent = _header;
+                rad_xanh.AutoSize = true;
+                rad_xanh.BackColor = Color.Transparent;
+                rad_xanh.ForeColor = Color.White;
+                rad_xanh.Location = new Point(120, 21);
+                rad_xanh.BringToFront();
+            }
+
+            if (rad_nau != null)
+            {
+                rad_nau.Parent = _header;
+                rad_nau.AutoSize = true;
+                rad_nau.BackColor = Color.Transparent;
+                rad_nau.ForeColor = Color.White;
+                rad_nau.Location = new Point(220, 21);
+                rad_nau.BringToFront();
+            }
 
             label1.Parent = _header;
             label1.AutoSize = false;
@@ -598,8 +704,8 @@ namespace WinApp
             label1.ForeColor = Color.White;
             label1.BackColor = Color.Transparent;
             label1.Font = F(11, true);
-            label1.Location = new Point(220, 0);
-            label1.Size = new Size(this.ClientSize.Width - 240, _header.Height);
+            label1.Location = new Point(320, 0);
+            label1.Size = new Size(this.ClientSize.Width - 340, _header.Height);
             label1.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
 
             // ===== MAIN GRID 2 CỘT =====
@@ -635,9 +741,10 @@ namespace WinApp
                 RowCount = 3
             };
 
-            rightStack.RowStyles.Add(new RowStyle(SizeType.Absolute, 400)); // top cards
-            rightStack.RowStyles.Add(new RowStyle(SizeType.Percent, 100)); // keypad
-            rightStack.RowStyles.Add(new RowStyle(SizeType.Absolute, 96));  // actions
+            // ✅ giãn chiều cao 3 card top xuống chút (400 -> 430)
+            rightStack.RowStyles.Add(new RowStyle(SizeType.Absolute, 430));
+            rightStack.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+            rightStack.RowStyles.Add(new RowStyle(SizeType.Absolute, 96));
 
             _mainGrid.Controls.Add(rightStack, 1, 0);
 
@@ -690,9 +797,23 @@ namespace WinApp
             txttienKM.Location = new Point(16, 286);
             txttienKM.Width = 10;
 
+            // ✅ yêu cầu mới: đem "Khách đưa" đặt dưới "Tiền khuyến mãi"
+            _lblKhachDua = new Label
+            {
+                Parent = cardPrice,
+                Text = "Khách đưa",
+                AutoSize = true,
+                ForeColor = _muted,
+                Font = F(9, true),
+                Location = new Point(16, 330)
+            };
+            txtkhachdua.Parent = cardPrice;
+            txtkhachdua.Location = new Point(16, 356);
+            txtkhachdua.Width = 10;
+
             // PAY
             PlaceLabel(cardPay, "Thành tiền", 16, 62);
-            MoveMoneyLabel(lblthanhtien, cardPay, 16, 90, _blue1, 18);
+            MoveMoneyLabel(lblthanhtien, cardPay, 16, 90, _accent1, 18);
 
             PlaceLabel(cardPay, "Tổng thanh toán", 16, 132);
             MoveMoneyLabel(lbltongthanhtoan, cardPay, 16, 160, Color.FromArgb(220, 38, 38), 18);
@@ -702,8 +823,6 @@ namespace WinApp
 
             PlaceLabel(cardPay, "Hình thức", 200, 62);
             MoveControl(cb_hinhthuc, cardPay, 200, 88, 10);
-            PlaceLabel(cardPay, "Khách đưa", 200, 132);
-            MoveControl(txtkhachdua, cardPay, 200, 158, 10);
 
             // ---- KEYPAD CARD ----
             var keypadCard = CreateCard("NHẬP SỐ", "Bàn phím số lượng");
@@ -790,16 +909,12 @@ namespace WinApp
                 txtsoluong.Width = wPrice;
                 txtkhuyenmai.Width = wPrice;
                 txttienKM.Width = wPrice;
+                txtkhachdua.Width = wPrice;
 
-                int rightCol = Math.Max(160, cardPay.ClientSize.Width / 2);
-                int wRight = Math.Max(120, cardPay.ClientSize.Width - rightCol - 16);
+                cb_hinhthuc.Width = Math.Max(120, cardPay.ClientSize.Width - (cardPay.ClientSize.Width / 2) - 16);
+                cb_hinhthuc.Left = Math.Max(160, cardPay.ClientSize.Width / 2);
 
-                cb_hinhthuc.Left = rightCol;
-                txtkhachdua.Left = rightCol;
-
-                cb_hinhthuc.Width = wRight;
-                txtkhachdua.Width = wRight;
-
+                // canh giữa keypad
                 keypadPanel.Width = keypadCard.ClientSize.Width - 32;
 
                 int totalBlockH = groupBox3.Height + 18 + keypadPanel.Height;
@@ -834,7 +949,7 @@ namespace WinApp
 
             this.Resize += (s, e) =>
             {
-                label1.Size = new Size(this.ClientSize.Width - 240, _header.Height);
+                label1.Size = new Size(this.ClientSize.Width - 340, _header.Height);
                 RelayoutCards();
             };
 
@@ -844,9 +959,11 @@ namespace WinApp
             BeginInvoke(new Action(() => this.ActiveControl = null));
         }
 
-
         private void ApplyModernStyles()
         {
+            // form bg
+            this.BackColor = _bg;
+
             StyleCombo(cb_loaikhach);
             StyleCombo(cb_khachhang);
             StyleCombo(cb_doituong);
@@ -860,20 +977,28 @@ namespace WinApp
 
             txttienKM.BorderStyle = BorderStyle.FixedSingle;
             txttienKM.Font = F(10, false);
+            txttienKM.BackColor = Color.White;
+            txttienKM.ForeColor = _text;
 
+            // keypad buttons use accent
             StyleKeypad(nut0); StyleKeypad(nut1); StyleKeypad(nut2); StyleKeypad(nut3); StyleKeypad(nut4);
             StyleKeypad(nut5); StyleKeypad(nut6); StyleKeypad(nut7); StyleKeypad(nut8); StyleKeypad(nut9);
 
+            // actions
             StylePrimary(nuthemvaodon);
             StyleSecondary(nutxemdon);
             StyleWarning(nutxoanhaplai);
 
+            // grid
             gvMenu.BackgroundColor = Color.White;
-            gvMenu.GridColor = Color.FromArgb(226, 232, 240);
+            gvMenu.GridColor = _border;
             gvMenu.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(241, 245, 249);
             gvMenu.ColumnHeadersDefaultCellStyle.ForeColor = _text;
-            gvMenu.DefaultCellStyle.SelectionBackColor = Color.FromArgb(219, 234, 254);
+            gvMenu.DefaultCellStyle.SelectionBackColor = Color.FromArgb(235, 230, 225);
             gvMenu.DefaultCellStyle.SelectionForeColor = _text;
+
+            // money labels
+            lblthanhtien.ForeColor = _accent1;
         }
 
         private void StyleCombo(ComboBox cb)
@@ -895,7 +1020,7 @@ namespace WinApp
         {
             b.FlatStyle = FlatStyle.Flat;
             b.FlatAppearance.BorderSize = 0;
-            b.BackColor = _blue1;
+            b.BackColor = _accent1;
             b.ForeColor = Color.White;
             b.Font = F(12, true);
             b.Cursor = Cursors.Hand;
@@ -914,7 +1039,7 @@ namespace WinApp
         {
             b.FlatStyle = FlatStyle.Flat;
             b.FlatAppearance.BorderSize = 0;
-            b.BackColor = _blue2;
+            b.BackColor = _accent2;
             b.ForeColor = Color.White;
             b.Font = F(12, true);
         }
@@ -1004,9 +1129,22 @@ namespace WinApp
         // ---------- Custom Panels ----------
         private class GradientPanel : Panel
         {
-            private readonly Color _c1;
-            private readonly Color _c2;
-            public GradientPanel(Color c1, Color c2) { _c1 = c1; _c2 = c2; DoubleBuffered = true; }
+            private Color _c1;
+            private Color _c2;
+
+            public GradientPanel(Color c1, Color c2)
+            {
+                _c1 = c1;
+                _c2 = c2;
+                DoubleBuffered = true;
+            }
+
+            public void SetColors(Color c1, Color c2)
+            {
+                _c1 = c1;
+                _c2 = c2;
+                Invalidate();
+            }
 
             protected override void OnPaintBackground(PaintEventArgs e)
             {
@@ -1066,12 +1204,10 @@ namespace WinApp
 
         private void nuthemvaodon_Click(object sender, EventArgs e)
         {
-
         }
 
         private void nutxemdon_Click(object sender, EventArgs e)
         {
-
         }
     }
 }

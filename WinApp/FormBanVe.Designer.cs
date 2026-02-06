@@ -77,6 +77,8 @@
             nut2 = new Button();
             nut1 = new Button();
             label9 = new Label();
+            rad_xanh = new RadioButton();
+            rad_nau = new RadioButton();
             groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             groupBox2.SuspendLayout();
@@ -101,6 +103,8 @@
             // 
             // groupBox1
             // 
+            groupBox1.Controls.Add(rad_nau);
+            groupBox1.Controls.Add(rad_xanh);
             groupBox1.Controls.Add(pictureBox1);
             groupBox1.Controls.Add(label2);
             groupBox1.Location = new Point(27, 43);
@@ -646,6 +650,28 @@
             label9.TabIndex = 3;
             label9.Text = "GAMAN";
             // 
+            // rad_xanh
+            // 
+            rad_xanh.AutoSize = true;
+            rad_xanh.Location = new Point(31, 628);
+            rad_xanh.Name = "rad_xanh";
+            rad_xanh.Size = new Size(97, 24);
+            rad_xanh.TabIndex = 2;
+            rad_xanh.TabStop = true;
+            rad_xanh.Text = "Tone xanh";
+            rad_xanh.UseVisualStyleBackColor = true;
+            // 
+            // rad_nau
+            // 
+            rad_nau.AutoSize = true;
+            rad_nau.Location = new Point(166, 628);
+            rad_nau.Name = "rad_nau";
+            rad_nau.Size = new Size(93, 24);
+            rad_nau.TabIndex = 3;
+            rad_nau.TabStop = true;
+            rad_nau.Text = "Tone Nâu";
+            rad_nau.UseVisualStyleBackColor = true;
+            // 
             // FormBanVe
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
@@ -722,5 +748,7 @@
         private NumericUpDown txtkhachdua;
         private GroupBox groupBox3;
         private Label label9;
+        private RadioButton rad_nau;
+        private RadioButton rad_xanh;
     }
 }
