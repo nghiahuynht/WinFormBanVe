@@ -168,12 +168,10 @@ namespace WinApp
 
             BuildModernCardLayout();
 
-
             rad_xanh.CheckedChanged -= ThemeRadio_CheckedChanged;
             rad_nau.CheckedChanged -= ThemeRadio_CheckedChanged;
             rad_xanh.CheckedChanged += ThemeRadio_CheckedChanged;
             rad_nau.CheckedChanged += ThemeRadio_CheckedChanged;
-
 
             if (!rad_xanh.Checked && !rad_nau.Checked) rad_xanh.Checked = true;
             ApplyThemePalette();
@@ -267,6 +265,10 @@ namespace WinApp
             gvMenu.ColumnHeadersDefaultCellStyle.SelectionBackColor = gvMenu.ColumnHeadersDefaultCellStyle.BackColor;
             gvMenu.ColumnHeadersDefaultCellStyle.SelectionForeColor = gvMenu.ColumnHeadersDefaultCellStyle.ForeColor;
 
+            // ✅ NEW: giãn khoảng cách dòng vé bằng padding + row height
+            gvMenu.DefaultCellStyle.Padding = new Padding(0, 4, 0, 4);
+            gvMenu.RowTemplate.Height = 40; // dòng vé nhìn thoáng hơn
+
             gvMenu.Columns.Clear();
             gvMenu.Columns.Add(new DataGridViewTextBoxColumn
             {
@@ -330,7 +332,11 @@ namespace WinApp
                 int headerRowIndex = gvMenu.Rows.Add(name, "");
                 var headerRow = gvMenu.Rows[headerRowIndex];
                 headerRow.Tag = new GroupHeaderTag { GroupCode = code, GroupName = name };
-                headerRow.Height = 34;
+
+                // ✅ NEW: header nhóm cao hơn + padding hơn để “giãn”
+                headerRow.Height = 44;
+                headerRow.DefaultCellStyle.Padding = new Padding(0, 6, 0, 6);
+
                 headerRow.DefaultCellStyle.BackColor = Color.White;
                 headerRow.DefaultCellStyle.ForeColor = Color.DodgerBlue;
                 headerRow.DefaultCellStyle.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
@@ -343,9 +349,21 @@ namespace WinApp
                     {
                         int idx = gvMenu.Rows.Add(t.Code, t.Description);
                         gvMenu.Rows[idx].Tag = t;
-                        gvMenu.Rows[idx].Height = 32;
+
+                        // ✅ NEW: dòng vé cao hơn để thoáng
+                        gvMenu.Rows[idx].Height = 40;
                     }
                 }
+
+                // ✅ NEW: thêm 1 dòng spacer mỏng sau mỗi nhóm (giãn giữa các loại vé)
+                int spacerIdx = gvMenu.Rows.Add("", "");
+                var spacerRow = gvMenu.Rows[spacerIdx];
+                spacerRow.Tag = new SpacerTag();
+                spacerRow.Height = 12;
+                spacerRow.DefaultCellStyle.BackColor = Color.White;
+                spacerRow.DefaultCellStyle.SelectionBackColor = Color.White;
+                spacerRow.DefaultCellStyle.ForeColor = Color.White;
+                spacerRow.DefaultCellStyle.SelectionForeColor = Color.White;
             }
 
             gvMenu.ClearSelection();
@@ -357,6 +375,17 @@ namespace WinApp
             if (e.RowIndex < 0 || e.ColumnIndex < 0) return;
 
             var row = gvMenu.Rows[e.RowIndex];
+
+            // ✅ NEW: vẽ spacer row (trắng trơn, không chữ, không line)
+            if (row.Tag is SpacerTag)
+            {
+                e.Handled = true;
+                Rectangle rowRect = gvMenu.GetRowDisplayRectangle(e.RowIndex, true);
+                using (var bg = new SolidBrush(Color.White))
+                    e.Graphics.FillRectangle(bg, rowRect);
+                return;
+            }
+
             if (!(row.Tag is GroupHeaderTag header)) return;
 
             if (e.ColumnIndex != 0)
@@ -367,29 +396,29 @@ namespace WinApp
 
             e.Handled = true;
 
-            Rectangle rowRect = gvMenu.GetRowDisplayRectangle(e.RowIndex, true);
-            using (var bg = new SolidBrush(Color.White))
-                e.Graphics.FillRectangle(bg, rowRect);
+            Rectangle rowRect2 = gvMenu.GetRowDisplayRectangle(e.RowIndex, true);
+            using (var bg2 = new SolidBrush(Color.White))
+                e.Graphics.FillRectangle(bg2, rowRect2);
 
             string text = $"••••  {header.GroupName.ToUpper()}  ••••";
             TextRenderer.DrawText(
                 e.Graphics,
                 text,
                 new Font("Segoe UI", 10F, FontStyle.Bold),
-                new Rectangle(rowRect.X + 8, rowRect.Y, rowRect.Width - 16, rowRect.Height),
+                new Rectangle(rowRect2.X + 8, rowRect2.Y, rowRect2.Width - 16, rowRect2.Height),
                 Color.DodgerBlue,
                 TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis
             );
 
             using (var pen = new Pen(Color.Gainsboro))
-                e.Graphics.DrawLine(pen, rowRect.Left, rowRect.Bottom - 1, rowRect.Right, rowRect.Bottom - 1);
+                e.Graphics.DrawLine(pen, rowRect2.Left, rowRect2.Bottom - 1, rowRect2.Right, rowRect2.Bottom - 1);
         }
 
         private void GvMenu_SelectionChanged(object sender, EventArgs e)
         {
             foreach (DataGridViewRow r in gvMenu.SelectedRows)
             {
-                if (r.Tag is GroupHeaderTag)
+                if (r.Tag is GroupHeaderTag || r.Tag is SpacerTag)
                     r.Selected = false;
             }
         }
@@ -401,6 +430,7 @@ namespace WinApp
             var tag = gvMenu.Rows[e.RowIndex].Tag;
 
             if (tag is GroupHeaderTag) return;
+            if (tag is SpacerTag) return;
 
             if (tag is TicketModel ticket)
             {
@@ -452,26 +482,20 @@ namespace WinApp
                 TicketGroup = t.TicketGroup,
                 Priority = t.Priority,
                 VAT = t.VAT,
-
                 LoaiVe = t.LoaiVe,
                 LoaiIn = t.LoaiIn,
                 GateName = t.GateName,
-
                 BillTemplate = t.BillTemplate,
                 EContractTemplate = t.EContractTemplate,
-
                 BranchId = t.BranchId,
                 IsKhachNuocNgoai = t.IsKhachNuocNgoai,
-
                 KyHieu = t.KyHieu,
                 TieuDeVe = t.TieuDeVe,
                 MauSoBienLai = t.MauSoBienLai,
-
                 CreatedBy = t.CreatedBy,
                 CreatedDate = t.CreatedDate,
                 UpdatedBy = t.UpdatedBy,
                 UpdatedDate = t.UpdatedDate,
-
                 IsDeleted = t.IsDeleted
             };
 
@@ -560,21 +584,19 @@ namespace WinApp
             lbltienthoi.Text = "0";
         }
 
-        #region UI CARD LAYOUT (giống mock) - chỉ thay giao diện
+        #region UI CARD LAYOUT
 
         private Panel _header;
         private TableLayoutPanel _mainGrid;
 
-        // label Kiểu in
         private Label _lblKieuIn;
-
-        // label "Khách đưa" (đặt dưới "Tiền khuyến mãi")
         private Label _lblKhachDua;
 
-        // theme state
+        private Label _lblDanhSachVeTitle;
+        private Panel _leftCardRef;
+
         private bool _coffeeMode = false;
 
-        // BLUE palette (default)
         private readonly Color _bgBlue = Color.FromArgb(246, 248, 252);
         private readonly Color _cardBlue = Color.White;
         private readonly Color _borderBlue = Color.FromArgb(226, 232, 240);
@@ -583,7 +605,6 @@ namespace WinApp
         private readonly Color _blue1 = Color.FromArgb(37, 99, 235);
         private readonly Color _blue2 = Color.FromArgb(29, 78, 216);
 
-        // COFFEE palette
         private readonly Color _bgCoffee = Color.FromArgb(248, 245, 242);
         private readonly Color _cardCoffee = Color.White;
         private readonly Color _borderCoffee = Color.FromArgb(229, 222, 215);
@@ -592,7 +613,6 @@ namespace WinApp
         private readonly Color _coffee1 = Color.FromArgb(111, 78, 55);
         private readonly Color _coffee2 = Color.FromArgb(74, 49, 35);
 
-        // current (will swap by theme)
         private Color _bg, _card, _border, _text, _muted, _accent1, _accent2;
 
         private Font F(float size, bool bold = false)
@@ -608,7 +628,6 @@ namespace WinApp
 
         private void ApplyThemePalette()
         {
-            // set palette
             if (_coffeeMode)
             {
                 _bg = _bgCoffee;
@@ -630,48 +649,59 @@ namespace WinApp
                 _accent2 = _blue2;
             }
 
-            // apply to form
             this.BackColor = _bg;
 
-            // header gradient
             if (_header is GradientPanel gp)
             {
                 gp.SetColors(_accent2, _accent1);
                 gp.Invalidate();
             }
 
-            // header text
-            if (label9 != null)
-            {
-                label9.BackColor = Color.Transparent;
-                label9.ForeColor = Color.White;
-            }
-            if (label1 != null)
-            {
-                label1.BackColor = Color.Transparent;
-                label1.ForeColor = Color.White;
-            }
+            if (label9 != null) { label9.BackColor = Color.Transparent; label9.ForeColor = Color.White; }
+            if (label1 != null) { label1.BackColor = Color.Transparent; label1.ForeColor = Color.White; }
 
-            // update dynamic labels colors
             if (_lblKieuIn != null) _lblKieuIn.ForeColor = _muted;
             if (_lblKhachDua != null) _lblKhachDua.ForeColor = _muted;
+            if (_lblDanhSachVeTitle != null) _lblDanhSachVeTitle.ForeColor = _text;
 
-            // restyle controls (buttons/grid/etc.)
+            if (lblCounterCartNum != null)
+            {
+                lblCounterCartNum.ForeColor = Color.Red;
+                lblCounterCartNum.BackColor = Color.Transparent;
+            }
+
             ApplyModernStyles();
+        }
+
+        private void EnableRecalcOnClickAnywhere()
+        {
+            this.MouseDown += (s, e) => tinhtienkhuyenmai();
+            AttachClickRecursive(this);
+        }
+
+        private void AttachClickRecursive(Control parent)
+        {
+            foreach (Control c in parent.Controls)
+            {
+                if (!(c is NumericUpDown) && !(c is TextBox) && !(c is ComboBox) && !(c is DataGridView))
+                {
+                    c.MouseDown += (s, e) => tinhtienkhuyenmai();
+                }
+
+                if (c.HasChildren) AttachClickRecursive(c);
+            }
         }
 
         private void BuildModernCardLayout()
         {
             if (_mainGrid != null) return;
 
-            // init current palette (blue default)
             _coffeeMode = rad_nau != null && rad_nau.Checked;
             ApplyThemePalette();
 
             groupBox1.Visible = false;
             groupBox2.Visible = false;
 
-            // ===== HEADER =====
             _header = new GradientPanel(_accent2, _accent1)
             {
                 Dock = DockStyle.Top,
@@ -681,7 +711,6 @@ namespace WinApp
             this.Controls.Add(_header);
             _header.BringToFront();
 
-            // ✅ đưa label9 lên header
             if (label9 != null)
             {
                 label9.Parent = _header;
@@ -693,7 +722,6 @@ namespace WinApp
                 label9.BringToFront();
             }
 
-            // ✅ đưa radio tone lên header (để không mất chức năng)
             if (rad_xanh != null)
             {
                 rad_xanh.Parent = _header;
@@ -724,7 +752,6 @@ namespace WinApp
             label1.Size = new Size(this.ClientSize.Width - 340, _header.Height);
             label1.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
 
-            // ===== MAIN GRID 2 CỘT =====
             _mainGrid = new TableLayoutPanel
             {
                 Dock = DockStyle.Fill,
@@ -738,17 +765,55 @@ namespace WinApp
             this.Controls.Add(_mainGrid);
             _mainGrid.BringToFront();
 
-            // ===== LEFT CARD =====
-            var leftCard = CreateCard("DANH SÁCH VÉ", "Chọn vé bên dưới");
+            var leftCard = CreateCard("GIỎ HÀNG / ĐƠN ĐANG BÁN", "");
+            _leftCardRef = leftCard;
             leftCard.Dock = DockStyle.Fill;
             _mainGrid.Controls.Add(leftCard, 0, 0);
 
+            if (pictureBox1 != null)
+            {
+                pictureBox1.Parent = leftCard;
+                pictureBox1.BackColor = Color.Transparent;
+                pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
+                pictureBox1.SetBounds(16, 16, 28, 28);
+                pictureBox1.BringToFront();
+            }
+
+            var lblTitle = leftCard.Controls.OfType<Label>().FirstOrDefault(l => l.Text == "GIỎ HÀNG / ĐƠN ĐANG BÁN");
+            var lblSub = leftCard.Controls.OfType<Label>().FirstOrDefault(l => l.Text == "Chọn vé bên dưới");
+            if (lblTitle != null) lblTitle.Location = new Point(52, 14);
+            if (lblSub != null) lblSub.Location = new Point(52, 38);
+
+            if (label2 != null) label2.Visible = false;
+
+            _lblDanhSachVeTitle = new Label
+            {
+                Parent = leftCard,
+                AutoSize = true,
+                Text = "DANH SÁCH VÉ",
+                Font = F(10.5f, true),
+                ForeColor = _text,
+                Location = new Point(16, 60)
+            };
+
+            if (lblCounterCartNum != null)
+            {
+                lblCounterCartNum.Parent = leftCard;
+                lblCounterCartNum.AutoSize = true;
+                lblCounterCartNum.Text = "ĐẾM SỐ NÈ";
+                if (lblTitle != null) lblCounterCartNum.Font = lblTitle.Font;
+
+                lblCounterCartNum.BackColor = Color.Transparent;
+                lblCounterCartNum.ForeColor = Color.Red;
+                lblCounterCartNum.BringToFront();
+            }
+
+            int gridTop = 92;
             gvMenu.Parent = leftCard;
-            gvMenu.Location = new Point(16, 68);
-            gvMenu.Size = new Size(leftCard.ClientSize.Width - 32, leftCard.ClientSize.Height - 84);
+            gvMenu.Location = new Point(16, gridTop);
+            gvMenu.Size = new Size(leftCard.ClientSize.Width - 32, leftCard.ClientSize.Height - (gridTop + 16));
             gvMenu.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
 
-            // ===== RIGHT STACK =====
             var rightStack = new TableLayoutPanel
             {
                 Dock = DockStyle.Fill,
@@ -757,14 +822,12 @@ namespace WinApp
                 RowCount = 3
             };
 
-            // ✅ giãn chiều cao 3 card top xuống chút (400 -> 430)
             rightStack.RowStyles.Add(new RowStyle(SizeType.Absolute, 430));
             rightStack.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
             rightStack.RowStyles.Add(new RowStyle(SizeType.Absolute, 96));
 
             _mainGrid.Controls.Add(rightStack, 1, 0);
 
-            // ---- TOP CARDS (3 cột) ----
             var topCards = new TableLayoutPanel
             {
                 Dock = DockStyle.Fill,
@@ -790,9 +853,6 @@ namespace WinApp
             topCards.Controls.Add(cardPrice, 1, 0);
             topCards.Controls.Add(cardPay, 2, 0);
 
-            // ====== Add controls into cards ======
-
-            // INFO
             PlaceLabel(cardInfo, "Loại khách", 16, 62);
             MoveControl(cb_loaikhach, cardInfo, 16, 88, 10);
             PlaceLabel(cardInfo, "Khách hàng", 16, 128);
@@ -800,7 +860,6 @@ namespace WinApp
             PlaceLabel(cardInfo, "Đối tượng", 16, 194);
             MoveControl(cb_doituong, cardInfo, 16, 220, 10);
 
-            // PRICE
             PlaceLabel(cardPrice, "Đơn giá", 16, 62);
             MoveControl(txtdongia, cardPrice, 16, 88, 10);
             PlaceLabel(cardPrice, "Số lượng", 16, 128);
@@ -813,7 +872,6 @@ namespace WinApp
             txttienKM.Location = new Point(16, 286);
             txttienKM.Width = 10;
 
-            // ✅ yêu cầu mới: đem "Khách đưa" đặt dưới "Tiền khuyến mãi"
             _lblKhachDua = new Label
             {
                 Parent = cardPrice,
@@ -827,7 +885,6 @@ namespace WinApp
             txtkhachdua.Location = new Point(16, 356);
             txtkhachdua.Width = 10;
 
-            // PAY
             PlaceLabel(cardPay, "Thành tiền", 16, 62);
             MoveMoneyLabel(lblthanhtien, cardPay, 16, 90, _accent1, 18);
 
@@ -840,7 +897,6 @@ namespace WinApp
             PlaceLabel(cardPay, "Hình thức", 200, 62);
             MoveControl(cb_hinhthuc, cardPay, 200, 88, 10);
 
-            // ---- KEYPAD CARD ----
             var keypadCard = CreateCard("NHẬP SỐ", "Bàn phím số lượng");
             keypadCard.Dock = DockStyle.Fill;
             rightStack.Controls.Add(keypadCard, 0, 1);
@@ -891,7 +947,6 @@ namespace WinApp
             nutxoanhaplai.Dock = DockStyle.Fill;
             nutxoanhaplai.Margin = new Padding(10);
 
-            // ---- ACTION BAR ----
             var actionBar = new Panel
             {
                 Dock = DockStyle.Fill,
@@ -930,7 +985,19 @@ namespace WinApp
                 cb_hinhthuc.Width = Math.Max(120, cardPay.ClientSize.Width - (cardPay.ClientSize.Width / 2) - 16);
                 cb_hinhthuc.Left = Math.Max(160, cardPay.ClientSize.Width / 2);
 
-                // canh giữa keypad
+                int gridTopLocal = 92;
+                gvMenu.Size = new Size(leftCard.ClientSize.Width - 32, leftCard.ClientSize.Height - (gridTopLocal + 16));
+
+                if (lblCounterCartNum != null)
+                {
+                    lblCounterCartNum.AutoSize = true;
+                    int rightPad = 50;
+                    int y = 14;
+                    int x = leftCard.ClientSize.Width - lblCounterCartNum.PreferredWidth - rightPad;
+                    x = Math.Max(x, 52 + 260);
+                    lblCounterCartNum.Location = new Point(x, y);
+                }
+
                 keypadPanel.Width = keypadCard.ClientSize.Width - 32;
 
                 int totalBlockH = groupBox3.Height + 18 + keypadPanel.Height;
@@ -971,13 +1038,12 @@ namespace WinApp
 
             ApplyModernStyles();
             RelayoutCards();
-
+            EnableRecalcOnClickAnywhere();
             BeginInvoke(new Action(() => this.ActiveControl = null));
         }
 
         private void ApplyModernStyles()
         {
-            // form bg
             this.BackColor = _bg;
 
             StyleCombo(cb_loaikhach);
@@ -996,16 +1062,13 @@ namespace WinApp
             txttienKM.BackColor = Color.White;
             txttienKM.ForeColor = _text;
 
-            // keypad buttons use accent
             StyleKeypad(nut0); StyleKeypad(nut1); StyleKeypad(nut2); StyleKeypad(nut3); StyleKeypad(nut4);
             StyleKeypad(nut5); StyleKeypad(nut6); StyleKeypad(nut7); StyleKeypad(nut8); StyleKeypad(nut9);
 
-            // actions
             StylePrimary(nuthemvaodon);
             StyleSecondary(nutxemdon);
             StyleWarning(nutxoanhaplai);
 
-            // grid
             gvMenu.BackgroundColor = Color.White;
             gvMenu.GridColor = _border;
             gvMenu.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(241, 245, 249);
@@ -1013,7 +1076,6 @@ namespace WinApp
             gvMenu.DefaultCellStyle.SelectionBackColor = Color.FromArgb(235, 230, 225);
             gvMenu.DefaultCellStyle.SelectionForeColor = _text;
 
-            // money labels
             lblthanhtien.ForeColor = _accent1;
         }
 
@@ -1142,7 +1204,6 @@ namespace WinApp
             b.Margin = new Padding(10);
         }
 
-        // ---------- Custom Panels ----------
         private class GradientPanel : Panel
         {
             private Color _c1;

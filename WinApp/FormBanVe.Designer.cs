@@ -79,6 +79,7 @@
             nut2 = new Button();
             nut1 = new Button();
             label9 = new Label();
+            lblCounterCartNum = new Label();
             groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             groupBox2.SuspendLayout();
@@ -672,11 +673,21 @@
             label9.TabIndex = 3;
             label9.Text = "GAMAN";
             // 
+            // lblCounterCartNum
+            // 
+            lblCounterCartNum.AutoSize = true;
+            lblCounterCartNum.Location = new Point(333, 16);
+            lblCounterCartNum.Name = "lblCounterCartNum";
+            lblCounterCartNum.Size = new Size(58, 20);
+            lblCounterCartNum.TabIndex = 4;
+            lblCounterCartNum.Text = "label10";
+            // 
             // FormBanVe
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1316, 726);
+            Controls.Add(lblCounterCartNum);
             Controls.Add(label9);
             Controls.Add(groupBox2);
             Controls.Add(groupBox1);
@@ -750,5 +761,6 @@
         private Label label9;
         private RadioButton rad_nau;
         private RadioButton rad_xanh;
+        private Label lblCounterCartNum;
     }
 }
