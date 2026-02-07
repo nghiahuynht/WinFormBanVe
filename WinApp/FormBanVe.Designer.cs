@@ -31,6 +31,8 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormBanVe));
             label1 = new Label();
             groupBox1 = new GroupBox();
+            rad_nau = new RadioButton();
+            rad_xanh = new RadioButton();
             pictureBox1 = new PictureBox();
             label2 = new Label();
             groupBox2 = new GroupBox();
@@ -77,8 +79,7 @@
             nut2 = new Button();
             nut1 = new Button();
             label9 = new Label();
-            rad_xanh = new RadioButton();
-            rad_nau = new RadioButton();
+            lblCounterCartNum = new Label();
             groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             groupBox2.SuspendLayout();
@@ -113,6 +114,28 @@
             groupBox1.TabIndex = 1;
             groupBox1.TabStop = false;
             groupBox1.Text = "Bán vé";
+            // 
+            // rad_nau
+            // 
+            rad_nau.AutoSize = true;
+            rad_nau.Location = new Point(166, 628);
+            rad_nau.Name = "rad_nau";
+            rad_nau.Size = new Size(93, 24);
+            rad_nau.TabIndex = 3;
+            rad_nau.TabStop = true;
+            rad_nau.Text = "Tone Nâu";
+            rad_nau.UseVisualStyleBackColor = true;
+            // 
+            // rad_xanh
+            // 
+            rad_xanh.AutoSize = true;
+            rad_xanh.Location = new Point(31, 628);
+            rad_xanh.Name = "rad_xanh";
+            rad_xanh.Size = new Size(97, 24);
+            rad_xanh.TabIndex = 2;
+            rad_xanh.TabStop = true;
+            rad_xanh.Text = "Tone xanh";
+            rad_xanh.UseVisualStyleBackColor = true;
             // 
             // pictureBox1
             // 
@@ -650,33 +673,21 @@
             label9.TabIndex = 3;
             label9.Text = "GAMAN";
             // 
-            // rad_xanh
+            // lblCounterCartNum
             // 
-            rad_xanh.AutoSize = true;
-            rad_xanh.Location = new Point(31, 628);
-            rad_xanh.Name = "rad_xanh";
-            rad_xanh.Size = new Size(97, 24);
-            rad_xanh.TabIndex = 2;
-            rad_xanh.TabStop = true;
-            rad_xanh.Text = "Tone xanh";
-            rad_xanh.UseVisualStyleBackColor = true;
-            // 
-            // rad_nau
-            // 
-            rad_nau.AutoSize = true;
-            rad_nau.Location = new Point(166, 628);
-            rad_nau.Name = "rad_nau";
-            rad_nau.Size = new Size(93, 24);
-            rad_nau.TabIndex = 3;
-            rad_nau.TabStop = true;
-            rad_nau.Text = "Tone Nâu";
-            rad_nau.UseVisualStyleBackColor = true;
+            lblCounterCartNum.AutoSize = true;
+            lblCounterCartNum.Location = new Point(333, 16);
+            lblCounterCartNum.Name = "lblCounterCartNum";
+            lblCounterCartNum.Size = new Size(58, 20);
+            lblCounterCartNum.TabIndex = 4;
+            lblCounterCartNum.Text = "label10";
             // 
             // FormBanVe
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1316, 726);
+            Controls.Add(lblCounterCartNum);
             Controls.Add(label9);
             Controls.Add(groupBox2);
             Controls.Add(groupBox1);
@@ -750,5 +761,6 @@
         private Label label9;
         private RadioButton rad_nau;
         private RadioButton rad_xanh;
+        private Label lblCounterCartNum;
     }
 }
