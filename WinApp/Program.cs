@@ -21,31 +21,16 @@ namespace WinApp
             ConfigureServices();
 
             var authenExists = AuthenInfo();
-            /* if (authenExists == null)
-             {
-                 var mainForm = ServiceProvider!.GetRequiredService<LoginForm>();
-                 Application.Run(mainForm);
-             }
-             else
-             {
-                 var mainForm = ServiceProvider!.GetRequiredService<FormBanVe>();
-                 Application.Run(mainForm);
-             }*/
 
             if (authenExists == null)
             {
-
               var mainForm = ServiceProvider!.GetRequiredService<LoginForm>();
-                var mainForm = ServiceProvider!.GetRequiredService<FormBanVe>();
-
-                
 
                 Application.Run(mainForm);
             }
             else
             {
-              //  var mainForm = ServiceProvider!.GetRequiredService<FormBanVe>();
-                var mainForm = ServiceProvider!.GetRequiredService<FormTest>();
+                var mainForm = ServiceProvider!.GetRequiredService<FormBanVe>();
                 Application.Run(mainForm);
             }
         }
