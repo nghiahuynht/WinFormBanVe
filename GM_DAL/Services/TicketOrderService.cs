@@ -22,7 +22,7 @@ namespace GM_DAL.Services
         }
 
 
-        public async Task<APIResultObject<ResCommon>> SaveUserInfo(PostOrderSaveModel model)
+        public async Task<APIResultObject<ResCommon>> SaveOrderInfo(PostOrderSaveModel model)
         {
             var res = new APIResultObject<ResCommon>();
             try

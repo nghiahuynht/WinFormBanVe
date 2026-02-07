@@ -31,6 +31,8 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormBanVe));
             label1 = new Label();
             groupBox1 = new GroupBox();
+            rad_nau = new RadioButton();
+            rad_xanh = new RadioButton();
             pictureBox1 = new PictureBox();
             label2 = new Label();
             groupBox2 = new GroupBox();
@@ -77,8 +79,6 @@
             nut2 = new Button();
             nut1 = new Button();
             label9 = new Label();
-            rad_xanh = new RadioButton();
-            rad_nau = new RadioButton();
             groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             groupBox2.SuspendLayout();
@@ -114,6 +114,28 @@
             groupBox1.TabStop = false;
             groupBox1.Text = "Bán vé";
             // 
+            // rad_nau
+            // 
+            rad_nau.AutoSize = true;
+            rad_nau.Location = new Point(166, 628);
+            rad_nau.Name = "rad_nau";
+            rad_nau.Size = new Size(93, 24);
+            rad_nau.TabIndex = 3;
+            rad_nau.TabStop = true;
+            rad_nau.Text = "Tone Nâu";
+            rad_nau.UseVisualStyleBackColor = true;
+            // 
+            // rad_xanh
+            // 
+            rad_xanh.AutoSize = true;
+            rad_xanh.Location = new Point(31, 628);
+            rad_xanh.Name = "rad_xanh";
+            rad_xanh.Size = new Size(97, 24);
+            rad_xanh.TabIndex = 2;
+            rad_xanh.TabStop = true;
+            rad_xanh.Text = "Tone xanh";
+            rad_xanh.UseVisualStyleBackColor = true;
+            // 
             // pictureBox1
             // 
             pictureBox1.BackColor = Color.Black;
@@ -130,9 +152,9 @@
             label2.AutoSize = true;
             label2.Location = new Point(122, 35);
             label2.Name = "label2";
-            label2.Size = new Size(268, 20);
+            label2.Size = new Size(260, 20);
             label2.TabIndex = 0;
-            label2.Text = "DANH SÁCH ĐƠN HÀNG ĐANG BÁN  :";
+            label2.Text = "DANH SÁCH ĐƠN HÀNG ĐANG BÁN:";
             // 
             // groupBox2
             // 
@@ -649,28 +671,6 @@
             label9.Size = new Size(85, 25);
             label9.TabIndex = 3;
             label9.Text = "GAMAN";
-            // 
-            // rad_xanh
-            // 
-            rad_xanh.AutoSize = true;
-            rad_xanh.Location = new Point(31, 628);
-            rad_xanh.Name = "rad_xanh";
-            rad_xanh.Size = new Size(97, 24);
-            rad_xanh.TabIndex = 2;
-            rad_xanh.TabStop = true;
-            rad_xanh.Text = "Tone xanh";
-            rad_xanh.UseVisualStyleBackColor = true;
-            // 
-            // rad_nau
-            // 
-            rad_nau.AutoSize = true;
-            rad_nau.Location = new Point(166, 628);
-            rad_nau.Name = "rad_nau";
-            rad_nau.Size = new Size(93, 24);
-            rad_nau.TabIndex = 3;
-            rad_nau.TabStop = true;
-            rad_nau.Text = "Tone Nâu";
-            rad_nau.UseVisualStyleBackColor = true;
             // 
             // FormBanVe
             // 
