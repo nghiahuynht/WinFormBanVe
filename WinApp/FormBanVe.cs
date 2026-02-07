@@ -152,13 +152,13 @@ namespace WinApp
 
             BuildModernCardLayout();
 
-            // ✅ bật lại chức năng chuyển theme (xanh/nâu)
+
             rad_xanh.CheckedChanged -= ThemeRadio_CheckedChanged;
             rad_nau.CheckedChanged -= ThemeRadio_CheckedChanged;
             rad_xanh.CheckedChanged += ThemeRadio_CheckedChanged;
             rad_nau.CheckedChanged += ThemeRadio_CheckedChanged;
 
-            // mặc định tone xanh
+
             if (!rad_xanh.Checked && !rad_nau.Checked) rad_xanh.Checked = true;
             ApplyThemePalette();
 
