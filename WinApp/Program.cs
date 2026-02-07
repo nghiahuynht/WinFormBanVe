@@ -34,8 +34,12 @@ namespace WinApp
 
             if (authenExists == null)
             {
-               // var mainForm = ServiceProvider!.GetRequiredService<LoginForm>();
-                var mainForm = ServiceProvider!.GetRequiredService<FormTest>();
+
+              var mainForm = ServiceProvider!.GetRequiredService<LoginForm>();
+                var mainForm = ServiceProvider!.GetRequiredService<FormBanVe>();
+
+                
+
                 Application.Run(mainForm);
             }
             else
