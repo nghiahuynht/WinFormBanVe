@@ -29,6 +29,8 @@
         private void InitializeComponent()
         {
             button1 = new Button();
+            webView21 = new Microsoft.Web.WebView2.WinForms.WebView2();
+            ((System.ComponentModel.ISupportInitialize)webView21).BeginInit();
             SuspendLayout();
             // 
             // button1
@@ -41,19 +43,34 @@
             button1.UseVisualStyleBackColor = true;
             button1.Click += button1_Click;
             // 
+            // webView21
+            // 
+            webView21.AllowExternalDrop = true;
+            webView21.CreationProperties = null;
+            webView21.DefaultBackgroundColor = Color.White;
+            webView21.Location = new Point(12, 225);
+            webView21.Name = "webView21";
+            webView21.Size = new Size(94, 29);
+            webView21.TabIndex = 1;
+            webView21.Visible = false;
+            webView21.ZoomFactor = 1D;
+            // 
             // FormTest
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(363, 266);
+            Controls.Add(webView21);
             Controls.Add(button1);
             Name = "FormTest";
             Text = "FormTest";
+            ((System.ComponentModel.ISupportInitialize)webView21).EndInit();
             ResumeLayout(false);
         }
 
         #endregion
 
         private Button button1;
+        private Microsoft.Web.WebView2.WinForms.WebView2 webView21;
     }
 }

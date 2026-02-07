@@ -62,7 +62,7 @@ namespace GM_DAL.Services
         }
 
 
-        public async Task<APIResultObject<List<PrintModel>>> ListSubCodeForPrint(long orderId)
+        public APIResultObject<List<PrintModel>> ListSubCodeForPrint(long orderId)
         {
             var res = new APIResultObject<List<PrintModel>>();
             try
@@ -71,13 +71,14 @@ namespace GM_DAL.Services
                 parameters.Add("@OrderId", CommonHelper.CheckLongNull(orderId));
                 using (var connection = adoContext.CreateConnection())
                 {
-                    var resultExcute = await connection.QueryAsync<PrintModel>("sp_GetListSubTicketOrderByOrderId", parameters, commandType: CommandType.StoredProcedure);
+                    var resultExcute = connection.Query<PrintModel>("sp_GetListSubTicketOrderByOrderId", parameters, commandType: CommandType.StoredProcedure);
                     res.data = resultExcute.ToList();
                 }
             }
             catch (Exception ex)
             {
                 // Xử lý lỗi
+                res.data = new List<PrintModel>();
                 res.message.exMessage = ex.Message;
             }
 
@@ -101,6 +102,7 @@ namespace GM_DAL.Services
             catch (Exception ex)
             {
                 // Xử lý lỗi
+                res.data = new TicketOrderHeaderModel();
                 res.message.exMessage = ex.Message;
             }
 

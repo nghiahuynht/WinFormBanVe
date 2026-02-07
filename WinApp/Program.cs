@@ -21,26 +21,15 @@ namespace WinApp
             ConfigureServices();
 
             var authenExists = AuthenInfo();
-            /* if (authenExists == null)
-             {
-                 var mainForm = ServiceProvider!.GetRequiredService<LoginForm>();
-                 Application.Run(mainForm);
-             }
-             else
-             {
-                 var mainForm = ServiceProvider!.GetRequiredService<FormBanVe>();
-                 Application.Run(mainForm);
-             }*/
-
+           
             if (authenExists == null)
             {
-                var mainForm = ServiceProvider!.GetRequiredService<FormBanVe>();
+                var mainForm = ServiceProvider!.GetRequiredService<LoginForm>();
                 Application.Run(mainForm);
             }
             else
             {
-              //  var mainForm = ServiceProvider!.GetRequiredService<FormBanVe>();
-                var mainForm = ServiceProvider!.GetRequiredService<FormTest>();
+                var mainForm = ServiceProvider!.GetRequiredService<FormBanVe>();
                 Application.Run(mainForm);
             }
         }
@@ -53,13 +42,12 @@ namespace WinApp
 
             services.AddSingleton<IUserInfoService, UserInfoService>();
             services.AddSingleton<IProductService, ProductService>();
-
+            services.AddSingleton<ITicketOrderService, TicketOrderService>();
 
             services.AddSingleton<ICustomerVIPService, CustomerVIPService>();
             services.AddTransient<FormBanVe>();
             services.AddTransient<LoginForm>();
             services.AddTransient<FormTest>();
-            services.AddTransient<PrintReview>();
             services.AddTransient<change_uspass>();
 
             ServiceProvider = services.BuildServiceProvider();
