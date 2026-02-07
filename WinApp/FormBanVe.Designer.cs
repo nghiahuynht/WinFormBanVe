@@ -76,6 +76,9 @@
             nut3 = new Button();
             nut2 = new Button();
             nut1 = new Button();
+            label9 = new Label();
+            rad_xanh = new RadioButton();
+            rad_nau = new RadioButton();
             groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             groupBox2.SuspendLayout();
@@ -90,15 +93,18 @@
             // 
             label1.AutoSize = true;
             label1.BackColor = Color.DodgerBlue;
+            label1.Font = new Font("Segoe UI", 11F, FontStyle.Regular, GraphicsUnit.Point);
             label1.ForeColor = SystemColors.ControlLightLight;
-            label1.Location = new Point(5, 5);
+            label1.Location = new Point(902, 9);
             label1.Name = "label1";
-            label1.Size = new Size(318, 20);
+            label1.Size = new Size(399, 25);
             label1.TabIndex = 0;
             label1.Text = "HỆ THỐNG BÁN VÉ KHU DU LỊCH LANGBIANG";
             // 
             // groupBox1
             // 
+            groupBox1.Controls.Add(rad_nau);
+            groupBox1.Controls.Add(rad_xanh);
             groupBox1.Controls.Add(pictureBox1);
             groupBox1.Controls.Add(label2);
             groupBox1.Location = new Point(27, 43);
@@ -474,6 +480,7 @@
             nutxemdon.TabIndex = 12;
             nutxemdon.Text = "XEM ĐƠN HÀNG";
             nutxemdon.UseVisualStyleBackColor = false;
+            nutxemdon.Click += nutxemdon_Click;
             // 
             // nuthemvaodon
             // 
@@ -486,6 +493,7 @@
             nuthemvaodon.TabIndex = 11;
             nuthemvaodon.Text = "THÊM VÀO ĐƠN HÀNG";
             nuthemvaodon.UseVisualStyleBackColor = false;
+            nuthemvaodon.Click += nuthemvaodon_Click;
             // 
             // nutxoanhaplai
             // 
@@ -630,11 +638,46 @@
             nut1.UseVisualStyleBackColor = false;
             nut1.Click += nut1_Click;
             // 
+            // label9
+            // 
+            label9.AutoSize = true;
+            label9.BackColor = Color.DodgerBlue;
+            label9.Font = new Font("Segoe UI", 11F, FontStyle.Bold, GraphicsUnit.Point);
+            label9.ForeColor = SystemColors.ControlLightLight;
+            label9.Location = new Point(27, 9);
+            label9.Name = "label9";
+            label9.Size = new Size(85, 25);
+            label9.TabIndex = 3;
+            label9.Text = "GAMAN";
+            // 
+            // rad_xanh
+            // 
+            rad_xanh.AutoSize = true;
+            rad_xanh.Location = new Point(31, 628);
+            rad_xanh.Name = "rad_xanh";
+            rad_xanh.Size = new Size(97, 24);
+            rad_xanh.TabIndex = 2;
+            rad_xanh.TabStop = true;
+            rad_xanh.Text = "Tone xanh";
+            rad_xanh.UseVisualStyleBackColor = true;
+            // 
+            // rad_nau
+            // 
+            rad_nau.AutoSize = true;
+            rad_nau.Location = new Point(166, 628);
+            rad_nau.Name = "rad_nau";
+            rad_nau.Size = new Size(93, 24);
+            rad_nau.TabIndex = 3;
+            rad_nau.TabStop = true;
+            rad_nau.Text = "Tone Nâu";
+            rad_nau.UseVisualStyleBackColor = true;
+            // 
             // FormBanVe
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1316, 726);
+            Controls.Add(label9);
             Controls.Add(groupBox2);
             Controls.Add(groupBox1);
             Controls.Add(label1);
@@ -704,5 +747,8 @@
         private NumericUpDown txtkhuyenmai;
         private NumericUpDown txtkhachdua;
         private GroupBox groupBox3;
+        private Label label9;
+        private RadioButton rad_nau;
+        private RadioButton rad_xanh;
     }
 }

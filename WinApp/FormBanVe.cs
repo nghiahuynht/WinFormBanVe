@@ -7,6 +7,7 @@ using GM_DAL.Models.TicketGroup;
 using GM_DAL.Services;
 using System;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -22,6 +23,7 @@ namespace WinApp
         private bool _isBindingLoaiKhach;
         private DataGridView gvMenu;
         private TicketModel _ticketDangChon;
+
         private sealed class GroupHeaderTag
         {
             public string GroupCode { get; set; }
@@ -32,6 +34,36 @@ namespace WinApp
         {
             public string Text { get; set; }
             public string Value { get; set; }
+        }
+
+        public FormBanVe()
+        {
+            InitializeComponent();
+            this.StartPosition = FormStartPosition.CenterScreen;
+            this.WindowState = FormWindowState.Maximized;
+
+            var context = new SQLAdoContext();
+            _ticketGroupService = new TicketGroupService(context);
+            _ticketService = new TicketService(context);
+            _customerTypeService = new CustomerTypeService(context);
+            _customerService = new CustomerService(context);
+
+            this.Load += FormBanVe_Load;
+            this.Shown += FormBanVe_Shown;
+
+            LoadDoiTuongComboBox();
+            SetupGiaNumeric();
+            loadhinhthucthanhtoan();
+            loadkieuin();
+        }
+
+        private void FormBanVe_Shown(object sender, EventArgs e)
+        {
+            BeginInvoke(new Action(() =>
+            {
+                this.ActiveControl = null;
+                this.Focus();
+            }));
         }
 
         private void LoadDoiTuongComboBox()
@@ -47,15 +79,14 @@ namespace WinApp
             cb_doituong.ValueMember = "Value";
             cb_doituong.DropDownStyle = ComboBoxStyle.DropDownList;
             cb_doituong.SelectedIndex = 0;
-
         }
 
         private void loadhinhthucthanhtoan()
         {
             var list = new[]
-           {
+            {
                 new ComboItem { Text = "Tiền Mặt", Value = "TM" },
-                new ComboItem { Text = "Chuyển Khoản",    Value = "CK" }
+                new ComboItem { Text = "Chuyển Khoản", Value = "CK" }
             }.ToList();
 
             cb_hinhthuc.DataSource = list;
@@ -63,17 +94,15 @@ namespace WinApp
             cb_hinhthuc.ValueMember = "Value";
             cb_hinhthuc.DropDownStyle = ComboBoxStyle.DropDownList;
             cb_hinhthuc.SelectedIndex = 0;
-
         }
-
 
         private void loadkieuin()
         {
             var list = new[]
-           {
+            {
                 new ComboItem { Text = "In lẻ", Value = "TM" },
-                new ComboItem { Text = "In Gộp",    Value = "CK" },
-                new ComboItem { Text = "In QR Code",    Value = "CK" }
+                new ComboItem { Text = "In Gộp", Value = "CK" },
+                new ComboItem { Text = "In QR Code", Value = "CK" }
             }.ToList();
 
             cb_kieuin.DataSource = list;
@@ -81,33 +110,15 @@ namespace WinApp
             cb_kieuin.ValueMember = "Value";
             cb_kieuin.DropDownStyle = ComboBoxStyle.DropDownList;
             cb_kieuin.SelectedIndex = 0;
-
         }
-        public FormBanVe()
-        {
-            InitializeComponent();
 
-            var context = new SQLAdoContext();
-            _ticketGroupService = new TicketGroupService(context);
-            _ticketService = new TicketService(context);
-            _customerTypeService = new CustomerTypeService(context);
-            _customerService = new CustomerService(context);
-
-            this.Load += FormBanVe_Load;
-
-            LoadDoiTuongComboBox();
-            SetupGiaNumeric();
-            loadhinhthucthanhtoan();
-            loadkieuin();
-        }
         private void SetupGiaNumeric()
         {
-            txtdongia.DecimalPlaces = 0;          // giá tiền thường không lẻ
-            txtdongia.ThousandsSeparator = true;  // 200,000
+            txtdongia.DecimalPlaces = 0;
+            txtdongia.ThousandsSeparator = true;
             txtdongia.Minimum = 0;
-            txtdongia.Maximum = 1000000000;       // 1 tỷ (tuỳ bạn)
+            txtdongia.Maximum = 1000000000;
             txtdongia.Increment = 1000;
-            // bước nhảy
 
             txtsoluong.DecimalPlaces = 0;
             txtsoluong.ThousandsSeparator = true;
@@ -115,51 +126,18 @@ namespace WinApp
             txtsoluong.Maximum = 10000;
             txtsoluong.Increment = 1;
 
-
-
-            txtkhachdua.DecimalPlaces = 0;          // giá tiền thường không lẻ
-            txtkhachdua.ThousandsSeparator = true;  // 200,000
+            txtkhachdua.DecimalPlaces = 0;
+            txtkhachdua.ThousandsSeparator = true;
             txtkhachdua.Minimum = 0;
-            txtkhachdua.Maximum = 1000000000;       // 1 tỷ (tuỳ bạn)
+            txtkhachdua.Maximum = 1000000000;
             txtkhachdua.Increment = 1000;
+
+            txtkhuyenmai.DecimalPlaces = 0;
+            txtkhuyenmai.ThousandsSeparator = true;
+            txtkhuyenmai.Minimum = 0;
+            txtkhuyenmai.Maximum = 100;
+            txtkhuyenmai.Increment = 1;
         }
-
-
-        private void GvMenu_CellClick(object sender, DataGridViewCellEventArgs e)
-        {
-            //click vào label vé bên trái
-            if (e.RowIndex < 0) return;
-
-            var tag = gvMenu.Rows[e.RowIndex].Tag;
-
-            // click group header => bỏ qua
-            if (tag is GroupHeaderTag) return;
-
-            if (tag is TicketModel ticket)
-            {
-                var code = ticket.Code ?? "";
-
-                _ticketDangChon = laythongtinve(code);
-
-                if (_ticketDangChon != null)
-                {
-                    // ✅ đổ giá vào textbox, format đẹp (không có số lẻ)
-                    txtdongia.Text = (_ticketDangChon.Price ?? 0).ToString("N0");
-                }
-                else
-                {
-                    txtdongia.Text = "";
-                }
-                txtkhuyenmai.Enabled = true;
-                txtsoluong.Enabled = true;
-                cb_hinhthuc.Enabled = true;
-                txtkhachdua.Enabled = true;
-
-                //MessageBox.Show(code, "Ticket Code");
-            }
-        }
-
-
 
         private void FormBanVe_Load(object sender, EventArgs e)
         {
@@ -167,11 +145,24 @@ namespace WinApp
             LoadMenuLikeImage();
             LoadLoaiKhachComboBox();
 
-            // tránh gắn event nhiều lần
             cb_loaikhach.SelectionChangeCommitted -= cb_loaikhach_SelectionChangeCommitted;
             cb_loaikhach.SelectionChangeCommitted += cb_loaikhach_SelectionChangeCommitted;
 
             load_cus_theo_style();
+
+            BuildModernCardLayout();
+
+            // ✅ bật lại chức năng chuyển theme (xanh/nâu)
+            rad_xanh.CheckedChanged -= ThemeRadio_CheckedChanged;
+            rad_nau.CheckedChanged -= ThemeRadio_CheckedChanged;
+            rad_xanh.CheckedChanged += ThemeRadio_CheckedChanged;
+            rad_nau.CheckedChanged += ThemeRadio_CheckedChanged;
+
+            // mặc định tone xanh
+            if (!rad_xanh.Checked && !rad_nau.Checked) rad_xanh.Checked = true;
+            ApplyThemePalette();
+
+            this.ActiveControl = null;
         }
 
         private void cb_loaikhach_SelectionChangeCommitted(object sender, EventArgs e)
@@ -182,7 +173,6 @@ namespace WinApp
 
         private void load_cus_theo_style()
         {
-            // lấy value của cb_loaikhach (ValueMember = Code)
             string cusTypeKey = cb_loaikhach.SelectedValue?.ToString();
 
             var res = _customerService.TimKiemTheoCusType(cusTypeKey);
@@ -197,8 +187,8 @@ namespace WinApp
 
             cb_khachhang.DataSource = null;
             cb_khachhang.DataSource = list;
-            cb_khachhang.DisplayMember = "CustomerName";   // hiển thị tên
-            cb_khachhang.ValueMember = "CustomerCode";     // value là mã
+            cb_khachhang.DisplayMember = "CustomerName";
+            cb_khachhang.ValueMember = "CustomerCode";
             cb_khachhang.DropDownStyle = ComboBoxStyle.DropDownList;
             cb_khachhang.SelectedIndex = 0;
         }
@@ -255,7 +245,6 @@ namespace WinApp
             gvMenu.ColumnHeadersDefaultCellStyle.ForeColor = Color.Black;
             gvMenu.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
 
-            // chặn xanh hệ thống
             gvMenu.DefaultCellStyle.Font = new Font("Segoe UI", 10F, FontStyle.Regular);
             gvMenu.DefaultCellStyle.SelectionBackColor = Color.WhiteSmoke;
             gvMenu.DefaultCellStyle.SelectionForeColor = Color.Black;
@@ -276,12 +265,10 @@ namespace WinApp
                 AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
             });
 
-            // đặt vị trí grid nằm dưới label2/pictureBox1
-            int top = Math.Max(label2.Bottom, pictureBox1.Bottom) + 10;
             gvMenu.Left = 12;
-            gvMenu.Top = top;
-            gvMenu.Width = groupBox1.ClientSize.Width - 24;
-            gvMenu.Height = groupBox1.ClientSize.Height - top - 12;
+            gvMenu.Top = 70;
+            gvMenu.Width = 500;
+            gvMenu.Height = 500;
             gvMenu.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
 
             gvMenu.CellPainting += GvMenu_CellPainting;
@@ -302,7 +289,7 @@ namespace WinApp
                 return;
             }
 
-            var tRes = _ticketService.toanbo(); // sp_ListAllTicket
+            var tRes = _ticketService.toanbo();
             if (tRes?.data == null)
             {
                 MessageBox.Show(tRes?.message?.exMessage ?? "Không lấy được Ticket!");
@@ -312,7 +299,6 @@ namespace WinApp
             var groups = gRes.data.Where(x => x != null).ToList();
             var tickets = tRes.data.Where(x => x != null).ToList();
 
-            // group vé theo TicketGroup
             var ticketsByGroup = tickets
                 .GroupBy(t => (t.TicketGroup ?? "").Trim())
                 .ToDictionary(g => g.Key, g => g.OrderBy(x => x.Priority ?? 0).ToList());
@@ -325,7 +311,6 @@ namespace WinApp
                 var code = (g.GroupCode ?? "").Trim();
                 var name = string.IsNullOrWhiteSpace(g.GroupName) ? code : g.GroupName;
 
-                // Dòng tiêu đề group
                 int headerRowIndex = gvMenu.Rows.Add(name, "");
                 var headerRow = gvMenu.Rows[headerRowIndex];
                 headerRow.Tag = new GroupHeaderTag { GroupCode = code, GroupName = name };
@@ -336,13 +321,12 @@ namespace WinApp
                 headerRow.DefaultCellStyle.SelectionBackColor = Color.White;
                 headerRow.DefaultCellStyle.SelectionForeColor = Color.DodgerBlue;
 
-                // Vé trong group
                 if (ticketsByGroup.TryGetValue(code, out var list))
                 {
                     foreach (var t in list)
                     {
                         int idx = gvMenu.Rows.Add(t.Code, t.Description);
-                        gvMenu.Rows[idx].Tag = t; // lưu ticket để click chọn
+                        gvMenu.Rows[idx].Tag = t;
                         gvMenu.Rows[idx].Height = 32;
                     }
                 }
@@ -352,7 +336,6 @@ namespace WinApp
             gvMenu.ResumeLayout();
         }
 
-        // Vẽ dòng group span ngang (giống kiểu ".... VÉ THAM QUAN ....")
         private void GvMenu_CellPainting(object sender, DataGridViewCellPaintingEventArgs e)
         {
             if (e.RowIndex < 0 || e.ColumnIndex < 0) return;
@@ -360,7 +343,6 @@ namespace WinApp
             var row = gvMenu.Rows[e.RowIndex];
             if (!(row.Tag is GroupHeaderTag header)) return;
 
-            // chỉ vẽ ở cột 0, cột 1 bỏ qua để span ngang
             if (e.ColumnIndex != 0)
             {
                 e.Handled = true;
@@ -389,7 +371,6 @@ namespace WinApp
 
         private void GvMenu_SelectionChanged(object sender, EventArgs e)
         {
-            // không cho select dòng header
             foreach (DataGridViewRow r in gvMenu.SelectedRows)
             {
                 if (r.Tag is GroupHeaderTag)
@@ -397,11 +378,37 @@ namespace WinApp
             }
         }
 
+        private void GvMenu_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0) return;
 
+            var tag = gvMenu.Rows[e.RowIndex].Tag;
 
-        // ==========================================================
-        // ✅ CHỈ THÊM HÀM NÀY (KHÔNG ĐỔI LOGIC HIỆN TẠI)
-        // ==========================================================
+            if (tag is GroupHeaderTag) return;
+
+            if (tag is TicketModel ticket)
+            {
+                var code = ticket.Code ?? "";
+
+                _ticketDangChon = laythongtinve(code);
+
+                if (_ticketDangChon != null)
+                {
+                    // ✅ giữ đúng như bạn đang làm
+                    txtdongia.Text = (_ticketDangChon.Price ?? 0).ToString("N0");
+                }
+                else
+                {
+                    txtdongia.Text = "";
+                }
+
+                txtkhuyenmai.Enabled = true;
+                txtsoluong.Enabled = true;
+                cb_hinhthuc.Enabled = true;
+                txtkhachdua.Enabled = true;
+            }
+        }
+
         private TicketModel laythongtinve(string mave)
         {
             if (string.IsNullOrWhiteSpace(mave))
@@ -420,7 +427,6 @@ namespace WinApp
 
             var t = res.data;
 
-            // tạo object mới và gán full thông tin
             var doituong = new TicketModel
             {
                 Id = t.Id,
@@ -466,7 +472,6 @@ namespace WinApp
                 return;
             }
             tinhtienkhuyenmai();
-
         }
 
         private void rad_mienphi_CheckedChanged(object sender, EventArgs e)
@@ -494,74 +499,40 @@ namespace WinApp
             }
         }
 
-        private void txtdongia_ValueChanged(object sender, EventArgs e)
-        {
-            tinhtienkhuyenmai();
-        }
+        private void txtdongia_ValueChanged(object sender, EventArgs e) => tinhtienkhuyenmai();
+        private void txtsoluong_ValueChanged(object sender, EventArgs e) => tinhtienkhuyenmai();
+        private void txtkhachdua_ValueChanged(object sender, EventArgs e) => tinhtienkhuyenmai();
 
-        private void txtsoluong_ValueChanged(object sender, EventArgs e)
-        {
-            tinhtienkhuyenmai();
-        }
-
-        private void txtkhachdua_ValueChanged(object sender, EventArgs e)
-        {
-            tinhtienkhuyenmai();
-        }
         private void clicknut(String nut)
         {
-            txtsoluong.Value = Convert.ToDecimal(nut);
+            if (txtsoluong.Value.ToString().Length < 1)
+            {
+                txtsoluong.Value = Convert.ToDecimal(nut);
+            }
+            else
+            {
+                if (txtsoluong.Value.ToString().Length < 4)
+                {
+                    txtsoluong.Value = Convert.ToDecimal(txtsoluong.Value + "" + Convert.ToDecimal(nut));
+                }
+                else
+                {
+                    MessageBox.Show("Vượt quá số lượng");
+                    return;
+                }
+            }
         }
 
-        private void nut1_Click(object sender, EventArgs e)
-        {
-            clicknut("1");
-        }
-
-        private void nut2_Click(object sender, EventArgs e)
-        {
-            clicknut("2");
-        }
-
-        private void nut3_Click(object sender, EventArgs e)
-        {
-            clicknut("3");
-        }
-
-        private void nut4_Click(object sender, EventArgs e)
-        {
-            clicknut("4");
-        }
-
-        private void nut5_Click(object sender, EventArgs e)
-        {
-            clicknut("5");
-        }
-
-        private void nut6_Click(object sender, EventArgs e)
-        {
-            clicknut("6");
-        }
-
-        private void nut7_Click(object sender, EventArgs e)
-        {
-            clicknut("7");
-        }
-
-        private void nut8_Click(object sender, EventArgs e)
-        {
-            clicknut("8");
-        }
-
-        private void nut9_Click(object sender, EventArgs e)
-        {
-            clicknut("9");
-        }
-
-        private void nut0_Click(object sender, EventArgs e)
-        {
-            clicknut("0");
-        }
+        private void nut1_Click(object sender, EventArgs e) => clicknut("1");
+        private void nut2_Click(object sender, EventArgs e) => clicknut("2");
+        private void nut3_Click(object sender, EventArgs e) => clicknut("3");
+        private void nut4_Click(object sender, EventArgs e) => clicknut("4");
+        private void nut5_Click(object sender, EventArgs e) => clicknut("5");
+        private void nut6_Click(object sender, EventArgs e) => clicknut("6");
+        private void nut7_Click(object sender, EventArgs e) => clicknut("7");
+        private void nut8_Click(object sender, EventArgs e) => clicknut("8");
+        private void nut9_Click(object sender, EventArgs e) => clicknut("9");
+        private void nut0_Click(object sender, EventArgs e) => clicknut("0");
 
         private void nutxoanhaplai_Click(object sender, EventArgs e)
         {
@@ -571,6 +542,672 @@ namespace WinApp
             lblthanhtien.Text = "0";
             lbltongthanhtoan.Text = "0";
             lbltienthoi.Text = "0";
+        }
+
+        #region UI CARD LAYOUT (giống mock) - chỉ thay giao diện
+
+        private Panel _header;
+        private TableLayoutPanel _mainGrid;
+
+        // label Kiểu in
+        private Label _lblKieuIn;
+
+        // label "Khách đưa" (đặt dưới "Tiền khuyến mãi")
+        private Label _lblKhachDua;
+
+        // theme state
+        private bool _coffeeMode = false;
+
+        // BLUE palette (default)
+        private readonly Color _bgBlue = Color.FromArgb(246, 248, 252);
+        private readonly Color _cardBlue = Color.White;
+        private readonly Color _borderBlue = Color.FromArgb(226, 232, 240);
+        private readonly Color _textBlue = Color.FromArgb(15, 23, 42);
+        private readonly Color _mutedBlue = Color.FromArgb(100, 116, 139);
+        private readonly Color _blue1 = Color.FromArgb(37, 99, 235);
+        private readonly Color _blue2 = Color.FromArgb(29, 78, 216);
+
+        // COFFEE palette
+        private readonly Color _bgCoffee = Color.FromArgb(248, 245, 242);
+        private readonly Color _cardCoffee = Color.White;
+        private readonly Color _borderCoffee = Color.FromArgb(229, 222, 215);
+        private readonly Color _textCoffee = Color.FromArgb(35, 24, 18);
+        private readonly Color _mutedCoffee = Color.FromArgb(128, 110, 96);
+        private readonly Color _coffee1 = Color.FromArgb(111, 78, 55);
+        private readonly Color _coffee2 = Color.FromArgb(74, 49, 35);
+
+        // current (will swap by theme)
+        private Color _bg, _card, _border, _text, _muted, _accent1, _accent2;
+
+        private Font F(float size, bool bold = false)
+            => new Font("Segoe UI", size, bold ? FontStyle.Bold : FontStyle.Regular, GraphicsUnit.Point);
+
+        private void ThemeRadio_CheckedChanged(object sender, EventArgs e)
+        {
+            if (rad_nau.Checked) _coffeeMode = true;
+            else if (rad_xanh.Checked) _coffeeMode = false;
+
+            ApplyThemePalette();
+        }
+
+        private void ApplyThemePalette()
+        {
+            // set palette
+            if (_coffeeMode)
+            {
+                _bg = _bgCoffee;
+                _card = _cardCoffee;
+                _border = _borderCoffee;
+                _text = _textCoffee;
+                _muted = _mutedCoffee;
+                _accent1 = _coffee1;
+                _accent2 = _coffee2;
+            }
+            else
+            {
+                _bg = _bgBlue;
+                _card = _cardBlue;
+                _border = _borderBlue;
+                _text = _textBlue;
+                _muted = _mutedBlue;
+                _accent1 = _blue1;
+                _accent2 = _blue2;
+            }
+
+            // apply to form
+            this.BackColor = _bg;
+
+            // header gradient
+            if (_header is GradientPanel gp)
+            {
+                gp.SetColors(_accent2, _accent1);
+                gp.Invalidate();
+            }
+
+            // header text
+            if (label9 != null)
+            {
+                label9.BackColor = Color.Transparent;
+                label9.ForeColor = Color.White;
+            }
+            if (label1 != null)
+            {
+                label1.BackColor = Color.Transparent;
+                label1.ForeColor = Color.White;
+            }
+
+            // update dynamic labels colors
+            if (_lblKieuIn != null) _lblKieuIn.ForeColor = _muted;
+            if (_lblKhachDua != null) _lblKhachDua.ForeColor = _muted;
+
+            // restyle controls (buttons/grid/etc.)
+            ApplyModernStyles();
+        }
+
+        private void BuildModernCardLayout()
+        {
+            if (_mainGrid != null) return;
+
+            // init current palette (blue default)
+            _coffeeMode = rad_nau != null && rad_nau.Checked;
+            ApplyThemePalette();
+
+            groupBox1.Visible = false;
+            groupBox2.Visible = false;
+
+            // ===== HEADER =====
+            _header = new GradientPanel(_accent2, _accent1)
+            {
+                Dock = DockStyle.Top,
+                Height = 66,
+                Padding = new Padding(18, 10, 18, 10)
+            };
+            this.Controls.Add(_header);
+            _header.BringToFront();
+
+            // ✅ đưa label9 lên header
+            if (label9 != null)
+            {
+                label9.Parent = _header;
+                label9.AutoSize = true;
+                label9.BackColor = Color.Transparent;
+                label9.ForeColor = Color.White;
+                label9.Font = F(11, true);
+                label9.Location = new Point(18, 20);
+                label9.BringToFront();
+            }
+
+            // ✅ đưa radio tone lên header (để không mất chức năng)
+            if (rad_xanh != null)
+            {
+                rad_xanh.Parent = _header;
+                rad_xanh.AutoSize = true;
+                rad_xanh.BackColor = Color.Transparent;
+                rad_xanh.ForeColor = Color.White;
+                rad_xanh.Location = new Point(120, 21);
+                rad_xanh.BringToFront();
+            }
+
+            if (rad_nau != null)
+            {
+                rad_nau.Parent = _header;
+                rad_nau.AutoSize = true;
+                rad_nau.BackColor = Color.Transparent;
+                rad_nau.ForeColor = Color.White;
+                rad_nau.Location = new Point(220, 21);
+                rad_nau.BringToFront();
+            }
+
+            label1.Parent = _header;
+            label1.AutoSize = false;
+            label1.TextAlign = ContentAlignment.MiddleRight;
+            label1.ForeColor = Color.White;
+            label1.BackColor = Color.Transparent;
+            label1.Font = F(11, true);
+            label1.Location = new Point(320, 0);
+            label1.Size = new Size(this.ClientSize.Width - 340, _header.Height);
+            label1.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+
+            // ===== MAIN GRID 2 CỘT =====
+            _mainGrid = new TableLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                BackColor = _bg,
+                Padding = new Padding(18, 16, 18, 18),
+                ColumnCount = 2,
+                RowCount = 1
+            };
+            _mainGrid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 30f));
+            _mainGrid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 70f));
+            this.Controls.Add(_mainGrid);
+            _mainGrid.BringToFront();
+
+            // ===== LEFT CARD =====
+            var leftCard = CreateCard("DANH SÁCH VÉ", "Chọn vé bên dưới");
+            leftCard.Dock = DockStyle.Fill;
+            _mainGrid.Controls.Add(leftCard, 0, 0);
+
+            gvMenu.Parent = leftCard;
+            gvMenu.Location = new Point(16, 68);
+            gvMenu.Size = new Size(leftCard.ClientSize.Width - 32, leftCard.ClientSize.Height - 84);
+            gvMenu.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+
+            // ===== RIGHT STACK =====
+            var rightStack = new TableLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                BackColor = _bg,
+                ColumnCount = 1,
+                RowCount = 3
+            };
+
+            // ✅ giãn chiều cao 3 card top xuống chút (400 -> 430)
+            rightStack.RowStyles.Add(new RowStyle(SizeType.Absolute, 430));
+            rightStack.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+            rightStack.RowStyles.Add(new RowStyle(SizeType.Absolute, 96));
+
+            _mainGrid.Controls.Add(rightStack, 1, 0);
+
+            // ---- TOP CARDS (3 cột) ----
+            var topCards = new TableLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                BackColor = _bg,
+                ColumnCount = 3,
+                RowCount = 1,
+                Padding = new Padding(0)
+            };
+            topCards.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 40f));
+            topCards.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 30f));
+            topCards.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 30f));
+            rightStack.Controls.Add(topCards, 0, 0);
+
+            var cardInfo = CreateCard("THÔNG TIN", "Loại khách / Khách hàng / Đối tượng");
+            var cardPrice = CreateCard("BẢNG GIÁ", "Đơn giá / Số lượng / Khuyến mãi");
+            var cardPay = CreateCard("THANH TOÁN", "Tổng tiền & tiền thối");
+
+            cardInfo.Dock = DockStyle.Fill;
+            cardPrice.Dock = DockStyle.Fill;
+            cardPay.Dock = DockStyle.Fill;
+
+            topCards.Controls.Add(cardInfo, 0, 0);
+            topCards.Controls.Add(cardPrice, 1, 0);
+            topCards.Controls.Add(cardPay, 2, 0);
+
+            // ====== Add controls into cards ======
+
+            // INFO
+            PlaceLabel(cardInfo, "Loại khách", 16, 62);
+            MoveControl(cb_loaikhach, cardInfo, 16, 88, 10);
+            PlaceLabel(cardInfo, "Khách hàng", 16, 128);
+            MoveControl(cb_khachhang, cardInfo, 16, 154, 10);
+            PlaceLabel(cardInfo, "Đối tượng", 16, 194);
+            MoveControl(cb_doituong, cardInfo, 16, 220, 10);
+
+            // PRICE
+            PlaceLabel(cardPrice, "Đơn giá", 16, 62);
+            MoveControl(txtdongia, cardPrice, 16, 88, 10);
+            PlaceLabel(cardPrice, "Số lượng", 16, 128);
+            MoveControl(txtsoluong, cardPrice, 16, 154, 10);
+            PlaceLabel(cardPrice, "Khuyến mãi (%)", 16, 194);
+            MoveControl(txtkhuyenmai, cardPrice, 16, 220, 10);
+
+            PlaceLabel(cardPrice, "Tiền khuyến mãi", 16, 260);
+            txttienKM.Parent = cardPrice;
+            txttienKM.Location = new Point(16, 286);
+            txttienKM.Width = 10;
+
+            // ✅ yêu cầu mới: đem "Khách đưa" đặt dưới "Tiền khuyến mãi"
+            _lblKhachDua = new Label
+            {
+                Parent = cardPrice,
+                Text = "Khách đưa",
+                AutoSize = true,
+                ForeColor = _muted,
+                Font = F(9, true),
+                Location = new Point(16, 330)
+            };
+            txtkhachdua.Parent = cardPrice;
+            txtkhachdua.Location = new Point(16, 356);
+            txtkhachdua.Width = 10;
+
+            // PAY
+            PlaceLabel(cardPay, "Thành tiền", 16, 62);
+            MoveMoneyLabel(lblthanhtien, cardPay, 16, 90, _accent1, 18);
+
+            PlaceLabel(cardPay, "Tổng thanh toán", 16, 132);
+            MoveMoneyLabel(lbltongthanhtoan, cardPay, 16, 160, Color.FromArgb(220, 38, 38), 18);
+
+            PlaceLabel(cardPay, "Tiền thối", 16, 202);
+            MoveMoneyLabel(lbltienthoi, cardPay, 16, 230, _text, 16);
+
+            PlaceLabel(cardPay, "Hình thức", 200, 62);
+            MoveControl(cb_hinhthuc, cardPay, 200, 88, 10);
+
+            // ---- KEYPAD CARD ----
+            var keypadCard = CreateCard("NHẬP SỐ", "Bàn phím số lượng");
+            keypadCard.Dock = DockStyle.Fill;
+            rightStack.Controls.Add(keypadCard, 0, 1);
+
+            groupBox3.Parent = keypadCard;
+            groupBox3.Size = new Size(380, 72);
+
+            _lblKieuIn = new Label
+            {
+                Parent = keypadCard,
+                Text = "Kiểu in",
+                AutoSize = true,
+                ForeColor = _muted,
+                Font = F(9, true)
+            };
+
+            cb_kieuin.Parent = keypadCard;
+            cb_kieuin.DropDownStyle = ComboBoxStyle.DropDownList;
+
+            var keypadPanel = new TableLayoutPanel
+            {
+                Parent = keypadCard,
+                BackColor = _card,
+                ColumnCount = 6,
+                RowCount = 2,
+                Size = new Size(keypadCard.ClientSize.Width - 32, 150),
+                Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top
+            };
+            for (int i = 0; i < 6; i++) keypadPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 16.66f));
+            keypadPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 50f));
+            keypadPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 50f));
+
+            AddKeypadBtn(keypadPanel, nut1, 0, 0);
+            AddKeypadBtn(keypadPanel, nut2, 1, 0);
+            AddKeypadBtn(keypadPanel, nut3, 2, 0);
+            AddKeypadBtn(keypadPanel, nut4, 3, 0);
+            AddKeypadBtn(keypadPanel, nut5, 4, 0);
+            AddKeypadBtn(keypadPanel, nut6, 5, 0);
+
+            AddKeypadBtn(keypadPanel, nut7, 0, 1);
+            AddKeypadBtn(keypadPanel, nut8, 1, 1);
+            AddKeypadBtn(keypadPanel, nut9, 2, 1);
+            AddKeypadBtn(keypadPanel, nut0, 3, 1);
+
+            nutxoanhaplai.Parent = keypadPanel;
+            keypadPanel.Controls.Add(nutxoanhaplai, 4, 1);
+            keypadPanel.SetColumnSpan(nutxoanhaplai, 2);
+            nutxoanhaplai.Dock = DockStyle.Fill;
+            nutxoanhaplai.Margin = new Padding(10);
+
+            // ---- ACTION BAR ----
+            var actionBar = new Panel
+            {
+                Dock = DockStyle.Fill,
+                BackColor = _bg
+            };
+            rightStack.Controls.Add(actionBar, 0, 2);
+
+            nuthemvaodon.Parent = actionBar;
+            nutxemdon.Parent = actionBar;
+
+            void RelayoutAction()
+            {
+                int h = 68;
+                int top = 12;
+                int half = actionBar.Width / 2;
+                nuthemvaodon.SetBounds(0, top, half - 12, h);
+                nutxemdon.SetBounds(half + 12, top, half - 12, h);
+            }
+            actionBar.Resize += (s, e) => RelayoutAction();
+            RelayoutAction();
+
+            void RelayoutCards()
+            {
+                int wInfo = Math.Max(120, cardInfo.ClientSize.Width - 32);
+                cb_loaikhach.Width = wInfo;
+                cb_khachhang.Width = wInfo;
+                cb_doituong.Width = wInfo;
+
+                int wPrice = Math.Max(120, cardPrice.ClientSize.Width - 32);
+                txtdongia.Width = wPrice;
+                txtsoluong.Width = wPrice;
+                txtkhuyenmai.Width = wPrice;
+                txttienKM.Width = wPrice;
+                txtkhachdua.Width = wPrice;
+
+                cb_hinhthuc.Width = Math.Max(120, cardPay.ClientSize.Width - (cardPay.ClientSize.Width / 2) - 16);
+                cb_hinhthuc.Left = Math.Max(160, cardPay.ClientSize.Width / 2);
+
+                // canh giữa keypad
+                keypadPanel.Width = keypadCard.ClientSize.Width - 32;
+
+                int totalBlockH = groupBox3.Height + 18 + keypadPanel.Height;
+                int free = keypadCard.ClientSize.Height - 68 - totalBlockH;
+                int offsetY = Math.Max(0, free / 2);
+
+                groupBox3.Left = 16;
+                groupBox3.Top = 64 + offsetY;
+
+                keypadPanel.Left = 16;
+                keypadPanel.Top = groupBox3.Bottom + 18;
+
+                int xKieuIn = groupBox3.Right + 24;
+                int yKieuIn = groupBox3.Top + 6;
+
+                _lblKieuIn.Location = new Point(xKieuIn, yKieuIn);
+
+                int comboTop = yKieuIn + 22;
+                int maxW = keypadCard.ClientSize.Width - xKieuIn - 16;
+                int wKieuIn = Math.Max(160, Math.Min(260, maxW));
+
+                cb_kieuin.Location = new Point(xKieuIn, comboTop);
+                cb_kieuin.Size = new Size(wKieuIn, cb_kieuin.Height);
+
+                if (maxW < 170)
+                {
+                    _lblKieuIn.Location = new Point(16, groupBox3.Bottom + 10);
+                    cb_kieuin.Location = new Point(16, _lblKieuIn.Bottom + 6);
+                    cb_kieuin.Width = keypadCard.ClientSize.Width - 32;
+                }
+            }
+
+            this.Resize += (s, e) =>
+            {
+                label1.Size = new Size(this.ClientSize.Width - 340, _header.Height);
+                RelayoutCards();
+            };
+
+            ApplyModernStyles();
+            RelayoutCards();
+
+            BeginInvoke(new Action(() => this.ActiveControl = null));
+        }
+
+        private void ApplyModernStyles()
+        {
+            // form bg
+            this.BackColor = _bg;
+
+            StyleCombo(cb_loaikhach);
+            StyleCombo(cb_khachhang);
+            StyleCombo(cb_doituong);
+            StyleCombo(cb_hinhthuc);
+            StyleCombo(cb_kieuin);
+
+            StyleNumeric(txtdongia);
+            StyleNumeric(txtsoluong);
+            StyleNumeric(txtkhuyenmai);
+            StyleNumeric(txtkhachdua);
+
+            txttienKM.BorderStyle = BorderStyle.FixedSingle;
+            txttienKM.Font = F(10, false);
+            txttienKM.BackColor = Color.White;
+            txttienKM.ForeColor = _text;
+
+            // keypad buttons use accent
+            StyleKeypad(nut0); StyleKeypad(nut1); StyleKeypad(nut2); StyleKeypad(nut3); StyleKeypad(nut4);
+            StyleKeypad(nut5); StyleKeypad(nut6); StyleKeypad(nut7); StyleKeypad(nut8); StyleKeypad(nut9);
+
+            // actions
+            StylePrimary(nuthemvaodon);
+            StyleSecondary(nutxemdon);
+            StyleWarning(nutxoanhaplai);
+
+            // grid
+            gvMenu.BackgroundColor = Color.White;
+            gvMenu.GridColor = _border;
+            gvMenu.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(241, 245, 249);
+            gvMenu.ColumnHeadersDefaultCellStyle.ForeColor = _text;
+            gvMenu.DefaultCellStyle.SelectionBackColor = Color.FromArgb(235, 230, 225);
+            gvMenu.DefaultCellStyle.SelectionForeColor = _text;
+
+            // money labels
+            lblthanhtien.ForeColor = _accent1;
+        }
+
+        private void StyleCombo(ComboBox cb)
+        {
+            cb.FlatStyle = FlatStyle.Flat;
+            cb.Font = F(10, false);
+            cb.BackColor = Color.White;
+            cb.ForeColor = _text;
+        }
+
+        private void StyleNumeric(NumericUpDown n)
+        {
+            n.Font = F(10, false);
+            n.BackColor = Color.White;
+            n.ForeColor = _text;
+        }
+
+        private void StyleKeypad(Button b)
+        {
+            b.FlatStyle = FlatStyle.Flat;
+            b.FlatAppearance.BorderSize = 0;
+            b.BackColor = _accent1;
+            b.ForeColor = Color.White;
+            b.Font = F(12, true);
+            b.Cursor = Cursors.Hand;
+        }
+
+        private void StylePrimary(Button b)
+        {
+            b.FlatStyle = FlatStyle.Flat;
+            b.FlatAppearance.BorderSize = 0;
+            b.BackColor = Color.FromArgb(34, 197, 94);
+            b.ForeColor = Color.White;
+            b.Font = F(12, true);
+        }
+
+        private void StyleSecondary(Button b)
+        {
+            b.FlatStyle = FlatStyle.Flat;
+            b.FlatAppearance.BorderSize = 0;
+            b.BackColor = _accent2;
+            b.ForeColor = Color.White;
+            b.Font = F(12, true);
+        }
+
+        private void StyleWarning(Button b)
+        {
+            b.FlatStyle = FlatStyle.Flat;
+            b.FlatAppearance.BorderSize = 0;
+            b.BackColor = Color.FromArgb(245, 158, 11);
+            b.ForeColor = Color.White;
+            b.Font = F(11, true);
+        }
+
+        private Panel CreateCard(string title, string subtitle)
+        {
+            var card = new CardPanel
+            {
+                BackColor = _card,
+                Dock = DockStyle.None,
+                Margin = new Padding(10),
+                Padding = new Padding(16),
+                Radius = 14,
+                BorderColor = _border,
+                Shadow = true
+            };
+
+            _ = new Label
+            {
+                Parent = card,
+                AutoSize = true,
+                Text = title,
+                Font = F(11, true),
+                ForeColor = _text,
+                Location = new Point(16, 14)
+            };
+
+            _ = new Label
+            {
+                Parent = card,
+                AutoSize = true,
+                Text = subtitle,
+                Font = F(9, false),
+                ForeColor = _muted,
+                Location = new Point(16, 38)
+            };
+
+            return card;
+        }
+
+        private void PlaceLabel(Control parent, string text, int x, int y)
+        {
+            _ = new Label
+            {
+                Parent = parent,
+                Text = text,
+                AutoSize = true,
+                ForeColor = _muted,
+                Font = F(9, true),
+                Location = new Point(x, y)
+            };
+        }
+
+        private void MoveControl(Control c, Control parent, int x, int y, int width)
+        {
+            c.Parent = parent;
+            c.Location = new Point(x, y);
+            c.Width = width;
+        }
+
+        private void MoveMoneyLabel(Label lb, Control parent, int x, int y, Color color, float fontSize)
+        {
+            lb.Parent = parent;
+            lb.AutoSize = true;
+            lb.Location = new Point(x, y);
+            lb.ForeColor = color;
+            lb.Font = F(fontSize, true);
+        }
+
+        private void AddKeypadBtn(TableLayoutPanel p, Button b, int col, int row)
+        {
+            b.Parent = p;
+            p.Controls.Add(b, col, row);
+            b.Dock = DockStyle.Fill;
+            b.Margin = new Padding(10);
+        }
+
+        // ---------- Custom Panels ----------
+        private class GradientPanel : Panel
+        {
+            private Color _c1;
+            private Color _c2;
+
+            public GradientPanel(Color c1, Color c2)
+            {
+                _c1 = c1;
+                _c2 = c2;
+                DoubleBuffered = true;
+            }
+
+            public void SetColors(Color c1, Color c2)
+            {
+                _c1 = c1;
+                _c2 = c2;
+                Invalidate();
+            }
+
+            protected override void OnPaintBackground(PaintEventArgs e)
+            {
+                using var br = new LinearGradientBrush(this.ClientRectangle, _c1, _c2, LinearGradientMode.Horizontal);
+                e.Graphics.FillRectangle(br, this.ClientRectangle);
+            }
+        }
+
+        private class CardPanel : Panel
+        {
+            public int Radius { get; set; } = 14;
+            public Color BorderColor { get; set; } = Color.LightGray;
+            public bool Shadow { get; set; } = true;
+
+            public CardPanel()
+            {
+                DoubleBuffered = true;
+                ResizeRedraw = true;
+            }
+
+            protected override void OnPaint(PaintEventArgs e)
+            {
+                e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+
+                var rect = new Rectangle(0, 0, Width - 1, Height - 1);
+                using var path = RoundedRect(rect, Radius);
+
+                if (Shadow)
+                {
+                    using var sh = new SolidBrush(Color.FromArgb(18, 0, 0, 0));
+                    var shadowRect = new Rectangle(2, 4, Width - 4, Height - 4);
+                    using var shadowPath = RoundedRect(shadowRect, Radius);
+                    e.Graphics.FillPath(sh, shadowPath);
+                }
+
+                using var bg = new SolidBrush(BackColor);
+                e.Graphics.FillPath(bg, path);
+
+                using var pen = new Pen(BorderColor, 1f);
+                e.Graphics.DrawPath(pen, path);
+            }
+
+            private GraphicsPath RoundedRect(Rectangle r, int radius)
+            {
+                int d = radius * 2;
+                var path = new GraphicsPath();
+                path.AddArc(r.X, r.Y, d, d, 180, 90);
+                path.AddArc(r.Right - d, r.Y, d, d, 270, 90);
+                path.AddArc(r.Right - d, r.Bottom - d, d, d, 0, 90);
+                path.AddArc(r.X, r.Bottom - d, d, d, 90, 90);
+                path.CloseFigure();
+                return path;
+            }
+        }
+
+        #endregion
+
+        private void nuthemvaodon_Click(object sender, EventArgs e)
+        {
+        }
+
+        private void nutxemdon_Click(object sender, EventArgs e)
+        {
         }
     }
 }
