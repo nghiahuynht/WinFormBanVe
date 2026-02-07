@@ -49,7 +49,6 @@ namespace WinApp
             services.AddTransient<FormBanVe>();
             services.AddTransient<LoginForm>();
             services.AddTransient<FormTest>();
-            services.AddTransient<PrintReview>();
             services.AddTransient<change_uspass>();
 
             ServiceProvider = services.BuildServiceProvider();
