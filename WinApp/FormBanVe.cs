@@ -23,6 +23,7 @@ namespace WinApp
         private readonly ITicketService _ticketService;
         private readonly ICustomerTypeService _customerTypeService;
         private readonly ICustomerService _customerService;
+        private readonly ITicketOrderService   _ticketOrderService;
 
         private bool _isBindingLoaiKhach;
         private DataGridView gvMenu;
@@ -55,6 +56,7 @@ namespace WinApp
             _ticketService = new TicketService(context);
             _customerTypeService = new CustomerTypeService(context);
             _customerService = new CustomerService(context);
+            _ticketOrderService = new TicketOrderService(context);
 
             this.Load += FormBanVe_Load;
             this.Shown += FormBanVe_Shown;
@@ -78,10 +80,10 @@ namespace WinApp
 
         private void CounterCart()
         {
-            //int cartCount = lstItemCarts.Count();
-            //lblCounterCart.Text = cartCount.ToString();
+            int cartCount = lstItemCarts.Count();
+            lblCounterCartNum.Text = cartCount.ToString();
         }
-        
+
 
         private void LoadDoiTuongComboBox()
         {
@@ -355,11 +357,9 @@ namespace WinApp
                     }
                 }
 
-                // ✅ NEW: thêm 1 dòng spacer mỏng sau mỗi nhóm (giãn giữa các loại vé)
                 int spacerIdx = gvMenu.Rows.Add("", "");
                 var spacerRow = gvMenu.Rows[spacerIdx];
-                spacerRow.Tag = new SpacerTag();
-                spacerRow.Height = 12;
+                spacerRow.Height = 15;
                 spacerRow.DefaultCellStyle.BackColor = Color.White;
                 spacerRow.DefaultCellStyle.SelectionBackColor = Color.White;
                 spacerRow.DefaultCellStyle.ForeColor = Color.White;
@@ -376,15 +376,7 @@ namespace WinApp
 
             var row = gvMenu.Rows[e.RowIndex];
 
-            // ✅ NEW: vẽ spacer row (trắng trơn, không chữ, không line)
-            if (row.Tag is SpacerTag)
-            {
-                e.Handled = true;
-                Rectangle rowRect = gvMenu.GetRowDisplayRectangle(e.RowIndex, true);
-                using (var bg = new SolidBrush(Color.White))
-                    e.Graphics.FillRectangle(bg, rowRect);
-                return;
-            }
+
 
             if (!(row.Tag is GroupHeaderTag header)) return;
 
@@ -418,7 +410,7 @@ namespace WinApp
         {
             foreach (DataGridViewRow r in gvMenu.SelectedRows)
             {
-                if (r.Tag is GroupHeaderTag || r.Tag is SpacerTag)
+                if (r.Tag is GroupHeaderTag)
                     r.Selected = false;
             }
         }
@@ -430,7 +422,7 @@ namespace WinApp
             var tag = gvMenu.Rows[e.RowIndex].Tag;
 
             if (tag is GroupHeaderTag) return;
-            if (tag is SpacerTag) return;
+
 
             if (tag is TicketModel ticket)
             {
@@ -440,7 +432,7 @@ namespace WinApp
 
                 if (_ticketDangChon != null)
                 {
-  
+
                     txtdongia.Text = (_ticketDangChon.Price ?? 0).ToString("N0");
                 }
                 else
@@ -675,7 +667,7 @@ namespace WinApp
 
         private void EnableRecalcOnClickAnywhere()
         {
-            this.MouseDown += (s, e) => tinhtienkhuyenmai();
+            this.MouseDown += (s, e) => TinhTongBill();
             AttachClickRecursive(this);
         }
 
@@ -685,7 +677,7 @@ namespace WinApp
             {
                 if (!(c is NumericUpDown) && !(c is TextBox) && !(c is ComboBox) && !(c is DataGridView))
                 {
-                    c.MouseDown += (s, e) => tinhtienkhuyenmai();
+                    c.MouseDown += (s, e) => TinhTongBill();
                 }
 
                 if (c.HasChildren) AttachClickRecursive(c);
@@ -800,7 +792,7 @@ namespace WinApp
             {
                 lblCounterCartNum.Parent = leftCard;
                 lblCounterCartNum.AutoSize = true;
-                lblCounterCartNum.Text = "ĐẾM SỐ NÈ";
+                lblCounterCartNum.Text = "0";
                 if (lblTitle != null) lblCounterCartNum.Font = lblTitle.Font;
 
                 lblCounterCartNum.BackColor = Color.Transparent;
@@ -1283,11 +1275,11 @@ namespace WinApp
         {
             int nexLineId = lstItemCarts.Count + 1;
             string customerTypeSelected = cb_loaikhach.SelectedValue != null ? cb_loaikhach.SelectedValue.ToString() : string.Empty;
-            string customerCodeSelected = cb_khachhang.SelectedValue != null? cb_khachhang.SelectedValue.ToString():string.Empty;
-            string customerNameSelected = cb_khachhang.SelectedValue != null ? cb_khachhang.SelectedText.ToString() : string.Empty;
+            string customerCodeSelected = cb_khachhang.SelectedValue != null ? cb_khachhang.SelectedValue.ToString() : string.Empty;
+            string customerNameSelected = cb_khachhang.SelectedValue != null ? cb_khachhang.Text.ToString() : string.Empty;
             string doiTuongSelected = cb_doituong.SelectedValue != null ? cb_doituong.SelectedValue.ToString() : string.Empty;
             int soluong = Convert.ToInt16(txtsoluong.Value);
-            decimal giaBan = _ticketDangChon.Price.HasValue ? _ticketDangChon.Price.Value : 0;
+            decimal giaBan = Convert.ToDecimal(txtdongia.Value);
             decimal totalFirst = giaBan * soluong;
             int giamPhanTram = Convert.ToInt16(txtkhuyenmai.Value);
             decimal tienKhuyenMai = Math.Round((giamPhanTram * totalFirst) / 100);
@@ -1308,21 +1300,42 @@ namespace WinApp
                 DiscountValue = tienKhuyenMai,
                 TienKhachDua = txtkhachdua.Value.ToString(),
                 PaymentType = paymentType,
-                UserLogin = AuthenInfo().userName
-
+                UserLogin = AuthenInfo().userName,
+                TotalAfterDiscount = tongSauKhuyenMai
+                
             };
             lstItemCarts.Add(newCartOrder);
             CounterCart();
+            ResetFormInput();
         }
 
         private void nutxemdon_Click(object sender, EventArgs e)
         {
-           
+            //CartViewerForm viewCart = new CartViewerForm(lstItemCarts, _ticketOrderService);
+            //viewCart.FormClosed += viewCartForm_FormClosed;
+            //viewCart.ShowDialog();
+
+            FormTest formtest = new FormTest(_ticketOrderService);
+            formtest.ShowDialog();
+
         }
 
+        private void viewCartForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            CounterCart();
+        }
 
-
-
+        private void ResetFormInput()
+        {
+            _ticketDangChon = null;
+            txtdongia.Value = 0;
+            txtkhachdua.Value = 0;
+            txtkhuyenmai.Value = 0;
+            txtsoluong.Value = 1;
+            lblthanhtien.Text = "0";
+            lbltongthanhtoan.Text = "0";
+            lbltienthoi.Text = "0";
+        }
 
         public static AuthenSuccessModel AuthenInfo()
         {
@@ -1342,13 +1355,10 @@ namespace WinApp
             return userObject;
         }
 
-
-
-
-
-
-
-
-
+        private void lblCounterCartNum_Click(object sender, EventArgs e)
+        {
+            CartViewerForm viewCart = new CartViewerForm(lstItemCarts, _ticketOrderService);
+            viewCart.ShowDialog();
+        }
     }
 }

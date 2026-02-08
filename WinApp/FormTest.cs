@@ -26,6 +26,7 @@ namespace WinApp
 
         string billPdfExportPath = ConfigurationManager.AppSettings["BillExportPath"];
         string imgsFolder = ConfigurationManager.AppSettings["ImageLibaryPath"];
+        string printerName = ConfigurationManager.AppSettings["PrinterName"];
         private static readonly IConverter _converter = new SynchronizedConverter(new PdfTools());
         public FormTest(ITicketOrderService ticketOrderService)
         {
@@ -265,7 +266,7 @@ namespace WinApp
             webView21.CoreWebView2.Navigate(new Uri(pdfPath).AbsoluteUri);
             await Task.Delay(300);
             var settings = webView21.CoreWebView2.Environment.CreatePrintSettings();
-            settings.PrinterName = "Xprinter 80C"; // Tên máy in trong hệ thống
+            settings.PrinterName = printerName; // Tên máy in trong hệ thống
             settings.ShouldPrintHeaderAndFooter = false;
             settings.ShouldPrintBackgrounds = false; 
 

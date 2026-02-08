@@ -25,5 +25,6 @@ namespace GM_DAL.Models.TicketOrder
         public string PaymentType { get; set; }
         public long CartLineId { get; set; }
         public string UserLogin { get; set; }
+        public decimal TotalAfterDiscount { get; set; }
     }
 }
