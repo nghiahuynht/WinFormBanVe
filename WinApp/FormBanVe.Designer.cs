@@ -80,6 +80,8 @@
             nut1 = new Button();
             label9 = new Label();
             lblCounterCartNum = new Label();
+            lbltendangnhap = new Label();
+            picus = new PictureBox();
             groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             groupBox2.SuspendLayout();
@@ -88,6 +90,7 @@
             ((System.ComponentModel.ISupportInitialize)txtkhuyenmai).BeginInit();
             ((System.ComponentModel.ISupportInitialize)txtdongia).BeginInit();
             ((System.ComponentModel.ISupportInitialize)txtsoluong).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)picus).BeginInit();
             SuspendLayout();
             // 
             // label1
@@ -96,7 +99,7 @@
             label1.BackColor = Color.DodgerBlue;
             label1.Font = new Font("Segoe UI", 11F, FontStyle.Regular, GraphicsUnit.Point);
             label1.ForeColor = SystemColors.ControlLightLight;
-            label1.Location = new Point(902, 9);
+            label1.Location = new Point(602, 9);
             label1.Name = "label1";
             label1.Size = new Size(399, 25);
             label1.TabIndex = 0;
@@ -684,11 +687,34 @@
             lblCounterCartNum.Text = "label10";
             lblCounterCartNum.Click += lblCounterCartNum_Click;
             // 
+            // lbltendangnhap
+            // 
+            lbltendangnhap.AutoSize = true;
+            lbltendangnhap.Location = new Point(219, 15);
+            lbltendangnhap.Name = "lbltendangnhap";
+            lbltendangnhap.Size = new Size(80, 20);
+            lbltendangnhap.TabIndex = 5;
+            lbltendangnhap.Text = "tendanhap";
+            // 
+            // picus
+            // 
+            picus.BackColor = Color.DodgerBlue;
+            picus.Image = (Image)resources.GetObject("picus.Image");
+            picus.Location = new Point(168, 9);
+            picus.Name = "picus";
+            picus.Size = new Size(45, 32);
+            picus.SizeMode = PictureBoxSizeMode.StretchImage;
+            picus.TabIndex = 6;
+            picus.TabStop = false;
+            picus.Click += picus_Click;
+            // 
             // FormBanVe
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1316, 726);
+            Controls.Add(picus);
+            Controls.Add(lbltendangnhap);
             Controls.Add(lblCounterCartNum);
             Controls.Add(label9);
             Controls.Add(groupBox2);
@@ -707,6 +733,7 @@
             ((System.ComponentModel.ISupportInitialize)txtkhuyenmai).EndInit();
             ((System.ComponentModel.ISupportInitialize)txtdongia).EndInit();
             ((System.ComponentModel.ISupportInitialize)txtsoluong).EndInit();
+            ((System.ComponentModel.ISupportInitialize)picus).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -764,5 +791,7 @@
         private RadioButton rad_nau;
         private RadioButton rad_xanh;
         private Label lblCounterCartNum;
+        private Label lbltendangnhap;
+        private PictureBox picus;
     }
 }
