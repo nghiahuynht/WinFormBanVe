@@ -15,6 +15,8 @@ namespace WinApp
 {
     public partial class FormBanVe : Form
     {
+        internal Label CounterLabel => lblCounterCartNum;
+        internal Panel LeftCardRef => _leftCardRef;
         private readonly ITicketGroupService _ticketGroupService;
         private readonly ITicketService _ticketService;
         private readonly ICustomerTypeService _customerTypeService;
@@ -42,6 +44,32 @@ namespace WinApp
         public FormBanVe()
         {
             InitializeComponent();
+
+
+            this.KeyPreview = true;
+            this.KeyDown += (s, e) =>
+            {
+                if (e.KeyCode == Keys.F12)
+                {
+                    var tuner = new FormUiTuner(this);
+                    tuner.Show();
+                    tuner.BringToFront();
+                }
+            };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
             this.StartPosition = FormStartPosition.CenterScreen;
             this.WindowState = FormWindowState.Maximized;
 
@@ -58,6 +86,7 @@ namespace WinApp
             SetupGiaNumeric();
             loadhinhthucthanhtoan();
             loadkieuin();
+
         }
 
         private void FormBanVe_Shown(object sender, EventArgs e)
