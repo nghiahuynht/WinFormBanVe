@@ -22,7 +22,7 @@ namespace GM_DAL.Services
         }
 
 
-        public async Task<APIResultObject<ResCommon>> SaveOrderInfo(PostOrderSaveModel model)
+        public async Task<APIResultObject<ResCommon>> SaveOrderInfo(PostOrderSaveModel model,string userName)
         {
             var res = new APIResultObject<ResCommon>();
             try
@@ -36,6 +36,8 @@ namespace GM_DAL.Services
                 parameters.Add("@CustomerType", CommonHelper.CheckStringNull(model.CustomerType));
                 parameters.Add("@TicketCode", CommonHelper.CheckStringNull(model.TicketCode));
                 parameters.Add("@Quanti", CommonHelper.CheckIntNull(model.Quanti));
+                parameters.Add("@Price", CommonHelper.CheckDecimalNull(model.Price));
+                parameters.Add("@UserName", userName);
                 parameters.Add("@BienSoXe", CommonHelper.CheckStringNull(model.BienSoXe));
                 parameters.Add("@IsCopy", false);
                 parameters.Add("@GateName", CommonHelper.CheckStringNull(model.GateName));
@@ -46,6 +48,8 @@ namespace GM_DAL.Services
                 parameters.Add("@DiscountValue", CommonHelper.CheckDecimalNull(model.DiscountValue));
                 parameters.Add("@TienKhachDua", CommonHelper.CheckDecimalNull(model.TienKhachDua));
                 parameters.Add("@PaymentType", CommonHelper.CheckStringNull(model.PaymentType));
+
+
                 using (var connection = adoContext.CreateConnection())
                 {
                     var resultExcute = await connection.QueryAsync<ResCommon>("sp_SaveOrderTicketWinForm", parameters, commandType: CommandType.StoredProcedure);

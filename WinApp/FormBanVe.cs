@@ -35,6 +35,7 @@ namespace WinApp
         private bool _isBindingLoaiKhach;
         private DataGridView gvMenu;
         private TicketModel _ticketDangChon;
+        private List<TicketPricePolicyModel> LstPricePolicy = new List<TicketPricePolicyModel>();
 
         public List<PostOrderSaveModel> lstItemCarts = new List<PostOrderSaveModel>();
         private int _hoverRowIndex = -1;
@@ -85,6 +86,7 @@ namespace WinApp
             loadhinhthucthanhtoan();
             loadkieuin();
             CounterCart();
+            GetListPricePolicy();
 
             lbltendangnhap.Text = FormBanVe.AuthenInfo().userName.ToString();
         }
@@ -308,6 +310,7 @@ namespace WinApp
             gvMenu.ColumnHeadersDefaultCellStyle.SelectionBackColor = gvMenu.ColumnHeadersDefaultCellStyle.BackColor;
             gvMenu.ColumnHeadersDefaultCellStyle.SelectionForeColor = gvMenu.ColumnHeadersDefaultCellStyle.ForeColor;
 
+   
             gvMenu.DefaultCellStyle.Padding = new Padding(0, 4, 0, 4);
             gvMenu.RowTemplate.Height = 40;
 
@@ -498,11 +501,12 @@ namespace WinApp
 
                 if (_ticketDangChon != null)
                 {
-                    txtdongia.Value = Math.Min(txtdongia.Maximum, Math.Max(txtdongia.Minimum, _ticketDangChon.Price ?? 0));
+                    decimal giaVeFromBangGia = PriceSaleFromPolicy();
+                    txtdongia.Text = giaVeFromBangGia.ToString("N0");
                 }
                 else
                 {
-                    txtdongia.Value = 0;
+                    txtdongia.Text = "";
                 }
 
                 txtkhuyenmai.Enabled = true;
@@ -1596,24 +1600,31 @@ namespace WinApp
             {
                 ClearLoginFile();
 
+        private void nutxemdon_Click(object sender, EventArgs e)
+        {
+            CartViewerForm viewCart = new CartViewerForm(lstItemCarts, _ticketOrderService);
+            viewCart.FormClosed += viewCartForm_FormClosed;
+            viewCart.ShowDialog();
                 // Tạo lại service đúng ctor của LoginForm
                 var context = new SQLAdoContext();
                 IUserInfoService userInfoService = new UserInfoService(context);
                 IProductService productService = new ProductService(context);
                 ICustomerVIPService customerVIPService = new CustomerVIPService(context);
-
                 var login = new LoginForm(userInfoService, productService, customerVIPService);
-
-                // Tránh Close ngay làm app thoát (nếu FormBanVe là main form)
-                this.Hide();
-                login.FormClosed += (s, args) => this.Close();
-                login.Show();
-            }
+            //FormTest formtest = new FormTest(_ticketOrderService);
+            //formtest.ShowDialog();
+            // Tránh Close ngay làm app thoát (nếu FormBanVe là main form)
+            this.Hide();
+            login.FormClosed += (s, args) => this.Close();
+            login.Show();
+        }
             catch (Exception ex)
             {
                 MessageBox.Show("Không thể đăng xuất: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-        }
+
+
+}
 
         public static void ClearLoginFile()
         {
@@ -1631,5 +1642,27 @@ namespace WinApp
                 }
             }
         }
+
+
+        private void GetListPricePolicy()
+        {
+            LstPricePolicy = _ticketService.GetListPricePolicy().data;
+        }
+
+        private decimal PriceSaleFromPolicy()
+        {
+            string ticketCode = _ticketDangChon.Code;
+            string customerType = cb_loaikhach.SelectedValue != null ? cb_loaikhach.SelectedValue.ToString() : string.Empty;
+            string doituong = cb_doituong.SelectedValue != null ? cb_doituong.SelectedValue.ToString() : string.Empty;
+
+            var priceObject = LstPricePolicy.Where(x => x.TicketCode == ticketCode
+            && x.CustomerType == customerType
+            && x.CustomerForm == doituong).FirstOrDefault();
+            return (priceObject != null ? priceObject.Price : 0);
+
+        }
+
+
+
     }
 }

@@ -8,5 +8,6 @@ namespace GM_DAL.IServices
     {
         APIResultObject<List<TicketModel>> toanbo();
         APIResultObject<TicketModel> timkiemvetheoten(string code);
+        APIResultObject<List<TicketPricePolicyModel>> GetListPricePolicy();
     }
 }
