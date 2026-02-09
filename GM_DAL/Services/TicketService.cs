@@ -35,6 +35,7 @@ namespace GM_DAL.Services
             }
             catch (Exception ex)
             {
+                res.data = new List<TicketModel>();
                 res.message.exMessage = ex.Message;
             }
 
@@ -68,5 +69,36 @@ namespace GM_DAL.Services
 
             return res;
         }
+
+
+
+        public APIResultObject<List<TicketPricePolicyModel>> GetListPricePolicy()
+        {
+            var res = new APIResultObject<List<TicketPricePolicyModel>>();
+
+            try
+            {
+                using (var connection = adoContext.CreateConnection())
+                {
+                    var result = connection.Query<TicketPricePolicyModel>(
+                        "sp_GetAllPricePolicy",
+                        commandType: CommandType.StoredProcedure);
+
+                    res.data = result.ToList();
+                }
+            }
+            catch (Exception ex)
+            {
+                res.data = new List<TicketPricePolicyModel>();
+                res.message.exMessage = ex.Message;
+            }
+
+            return res;
+        }
+
+
+
+
+
     }
 }

@@ -28,6 +28,7 @@ namespace WinApp
         private bool _isBindingLoaiKhach;
         private DataGridView gvMenu;
         private TicketModel _ticketDangChon;
+        private List<TicketPricePolicyModel> LstPricePolicy = new List<TicketPricePolicyModel>();
 
         public List<PostOrderSaveModel> lstItemCarts = new List<PostOrderSaveModel>();
         private sealed class GroupHeaderTag
@@ -66,6 +67,7 @@ namespace WinApp
             loadhinhthucthanhtoan();
             loadkieuin();
             CounterCart();
+            GetListPricePolicy();
         }
 
         private void FormBanVe_Shown(object sender, EventArgs e)
@@ -267,7 +269,7 @@ namespace WinApp
             gvMenu.ColumnHeadersDefaultCellStyle.SelectionBackColor = gvMenu.ColumnHeadersDefaultCellStyle.BackColor;
             gvMenu.ColumnHeadersDefaultCellStyle.SelectionForeColor = gvMenu.ColumnHeadersDefaultCellStyle.ForeColor;
 
-            // ✅ NEW: giãn khoảng cách dòng vé bằng padding + row height
+   
             gvMenu.DefaultCellStyle.Padding = new Padding(0, 4, 0, 4);
             gvMenu.RowTemplate.Height = 40; // dòng vé nhìn thoáng hơn
 
@@ -432,8 +434,8 @@ namespace WinApp
 
                 if (_ticketDangChon != null)
                 {
-
-                    txtdongia.Text = (_ticketDangChon.Price ?? 0).ToString("N0");
+                    decimal giaVeFromBangGia = PriceSaleFromPolicy();
+                    txtdongia.Text = giaVeFromBangGia.ToString("N0");
                 }
                 else
                 {
@@ -1311,12 +1313,12 @@ namespace WinApp
 
         private void nutxemdon_Click(object sender, EventArgs e)
         {
-            //CartViewerForm viewCart = new CartViewerForm(lstItemCarts, _ticketOrderService);
-            //viewCart.FormClosed += viewCartForm_FormClosed;
-            //viewCart.ShowDialog();
+            CartViewerForm viewCart = new CartViewerForm(lstItemCarts, _ticketOrderService);
+            viewCart.FormClosed += viewCartForm_FormClosed;
+            viewCart.ShowDialog();
 
-            FormTest formtest = new FormTest(_ticketOrderService);
-            formtest.ShowDialog();
+            //FormTest formtest = new FormTest(_ticketOrderService);
+            //formtest.ShowDialog();
 
         }
 
@@ -1360,5 +1362,27 @@ namespace WinApp
             CartViewerForm viewCart = new CartViewerForm(lstItemCarts, _ticketOrderService);
             viewCart.ShowDialog();
         }
+
+
+        private void GetListPricePolicy()
+        {
+            LstPricePolicy = _ticketService.GetListPricePolicy().data;
+        }
+
+        private decimal PriceSaleFromPolicy()
+        {
+            string ticketCode = _ticketDangChon.Code;
+            string customerType = cb_loaikhach.SelectedValue != null ? cb_loaikhach.SelectedValue.ToString() : string.Empty;
+            string doituong = cb_doituong.SelectedValue != null ? cb_doituong.SelectedValue.ToString() : string.Empty;
+
+            var priceObject = LstPricePolicy.Where(x => x.TicketCode == ticketCode
+            && x.CustomerType == customerType
+            && x.CustomerForm == doituong).FirstOrDefault();
+            return (priceObject != null ? priceObject.Price : 0);
+
+        }
+
+
+
     }
 }
