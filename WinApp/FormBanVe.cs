@@ -1031,11 +1031,6 @@ namespace WinApp
             ResetFormInput();
         }
 
-        private void nutxemdon_Click(object sender, EventArgs e)
-        {
-            FormTest formtest = new FormTest(_ticketOrderService);
-            formtest.ShowDialog();
-        }
 
         // ✅✅✅ CHỈ THAY ĐOẠN NÀY: BuildModernCardLayout (đoạn badge)
         private void BuildModernCardLayout()
@@ -1588,43 +1583,42 @@ namespace WinApp
         private void picus_Click(object sender, EventArgs e)
         {
             var rs = MessageBox.Show(
-        "Bạn có chắc muốn đăng xuất hay không ?",
-        "Xác nhận đăng xuất",
-        MessageBoxButtons.YesNo,
-        MessageBoxIcon.Question
-    );
+                "Bạn có chắc muốn đăng xuất hay không ?",
+                "Xác nhận đăng xuất",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question
+            );
 
             if (rs != DialogResult.Yes) return;
 
             try
             {
                 ClearLoginFile();
-
-        private void nutxemdon_Click(object sender, EventArgs e)
-        {
-            CartViewerForm viewCart = new CartViewerForm(lstItemCarts, _ticketOrderService);
-            viewCart.FormClosed += viewCartForm_FormClosed;
-            viewCart.ShowDialog();
                 // Tạo lại service đúng ctor của LoginForm
                 var context = new SQLAdoContext();
                 IUserInfoService userInfoService = new UserInfoService(context);
                 IProductService productService = new ProductService(context);
                 ICustomerVIPService customerVIPService = new CustomerVIPService(context);
                 var login = new LoginForm(userInfoService, productService, customerVIPService);
-            //FormTest formtest = new FormTest(_ticketOrderService);
-            //formtest.ShowDialog();
-            // Tránh Close ngay làm app thoát (nếu FormBanVe là main form)
-            this.Hide();
-            login.FormClosed += (s, args) => this.Close();
-            login.Show();
-        }
+                this.Hide();
+                login.FormClosed += (s, args) => this.Close();
+                login.Show();
+            }
             catch (Exception ex)
             {
                 MessageBox.Show("Không thể đăng xuất: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
 
-}
+        }
+
+        private void nutxemdon_Click(object sender, EventArgs e)
+        {
+            CartViewerForm viewCart = new CartViewerForm(lstItemCarts, _ticketOrderService);
+            viewCart.FormClosed += viewCartForm_FormClosed;
+            viewCart.ShowDialog();
+
+        }
 
         public static void ClearLoginFile()
         {
