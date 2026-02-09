@@ -9,7 +9,8 @@ using System.Threading.Tasks;
 namespace GM_DAL.IServices
 {
     public interface ITicketOrderService
-    {   Task<APIResultObject<ResCommon>> SaveUserInfo(PostOrderSaveModel model);
+    {
+        Task<APIResultObject<ResCommon>> SaveOrderInfo(PostOrderSaveModel model);
         APIResultObject<List<PrintModel>> ListSubCodeForPrint(long orderId);
         Task<APIResultObject<TicketOrderHeaderModel>> GetHeaderOrderById(long orderId);
     }

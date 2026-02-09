@@ -153,9 +153,9 @@
             label2.AutoSize = true;
             label2.Location = new Point(122, 35);
             label2.Name = "label2";
-            label2.Size = new Size(268, 20);
+            label2.Size = new Size(260, 20);
             label2.TabIndex = 0;
-            label2.Text = "DANH SÁCH ĐƠN HÀNG ĐANG BÁN  :";
+            label2.Text = "DANH SÁCH ĐƠN HÀNG ĐANG BÁN:";
             // 
             // groupBox2
             // 
@@ -676,11 +676,13 @@
             // lblCounterCartNum
             // 
             lblCounterCartNum.AutoSize = true;
-            lblCounterCartNum.Location = new Point(333, 16);
+            lblCounterCartNum.Font = new Font("Segoe UI", 14F, FontStyle.Regular, GraphicsUnit.Point);
+            lblCounterCartNum.Location = new Point(462, 9);
             lblCounterCartNum.Name = "lblCounterCartNum";
-            lblCounterCartNum.Size = new Size(58, 20);
+            lblCounterCartNum.Size = new Size(91, 32);
             lblCounterCartNum.TabIndex = 4;
             lblCounterCartNum.Text = "label10";
+            lblCounterCartNum.Click += lblCounterCartNum_Click;
             // 
             // FormBanVe
             // 
