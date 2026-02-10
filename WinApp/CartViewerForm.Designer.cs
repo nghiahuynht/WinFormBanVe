@@ -35,9 +35,8 @@
             label3 = new Label();
             lblTienThoi = new Label();
             txtTienKhachDua = new TextBox();
-            webView21 = new Microsoft.Web.WebView2.WinForms.WebView2();
+            button1 = new Button();
             ((System.ComponentModel.ISupportInitialize)dataGridCartView).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)webView21).BeginInit();
             SuspendLayout();
             // 
             // dataGridCartView
@@ -115,24 +114,23 @@
             txtTienKhachDua.Text = "0";
             txtTienKhachDua.MouseLeave += txtTienKhachDua_MouseLeave;
             // 
-            // webView21
+            // button1
             // 
-            webView21.AllowExternalDrop = true;
-            webView21.CreationProperties = null;
-            webView21.DefaultBackgroundColor = Color.White;
-            webView21.Location = new Point(1250, 27);
-            webView21.Name = "webView21";
-            webView21.Size = new Size(297, 258);
-            webView21.TabIndex = 8;
-            webView21.ZoomFactor = 1D;
+            button1.Location = new Point(1140, 308);
+            button1.Name = "button1";
+            button1.Size = new Size(94, 29);
+            button1.TabIndex = 9;
+            button1.Text = "IN tesst";
+            button1.UseVisualStyleBackColor = true;
+            button1.Click += button1_Click;
             // 
             // CartViewerForm
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(192, 255, 192);
-            ClientSize = new Size(1569, 361);
-            Controls.Add(webView21);
+            ClientSize = new Size(1258, 361);
+            Controls.Add(button1);
             Controls.Add(txtTienKhachDua);
             Controls.Add(lblTienThoi);
             Controls.Add(label3);
@@ -144,7 +142,6 @@
             Text = "DANH SÁCH ĐƠN ĐANG BÁN";
             Load += CartViewerForm_Load;
             ((System.ComponentModel.ISupportInitialize)dataGridCartView).EndInit();
-            ((System.ComponentModel.ISupportInitialize)webView21).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -158,6 +155,6 @@
         private Label label3;
         private Label lblTienThoi;
         private TextBox txtTienKhachDua;
-        private Microsoft.Web.WebView2.WinForms.WebView2 webView21;
+        private Button button1;
     }
 }

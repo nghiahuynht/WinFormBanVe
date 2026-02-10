@@ -8,6 +8,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <PackageIcon>icon-app.jpg</PackageIcon>
     <ApplicationIcon>ok_standard.ico</ApplicationIcon>
+    <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
 
   <ItemGroup>
@@ -21,6 +22,9 @@
     <PackageReference Include="Microsoft.Office.Interop.Excel" Version="16.0.18925.20022" />
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3595.46" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageReference Include="PDFium.x86" Version="4648.0.0" />
+    <PackageReference Include="PdfiumViewer.Native.x86.no_v8-no_xfa" Version="2018.4.8.256" />
+    <PackageReference Include="PdfiumViewer.Updated" Version="2.14.5" />
     <PackageReference Include="QRCoder" Version="1.7.0" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="10.0.0" />
     <PackageReference Include="System.IO.Ports" Version="10.0.0" />
