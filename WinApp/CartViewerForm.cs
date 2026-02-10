@@ -44,7 +44,7 @@ namespace WinApp
       
             InitGrid();
             CalculaTotalCart();
-            button1.Visible = false;
+           // button1.Visible = false;
         }
 
         private void InitGrid()
@@ -292,7 +292,46 @@ namespace WinApp
                             lstItems.Remove(objectOrder);
                             ReBindGridCartAfterAction();
                             CalculaTotalCart();
-                            PrintOrder(Convert.ToInt64(newOrder.data.value));
+
+
+                            /*========== Call In =============*/
+
+
+                            using (WaitingForm fWait = new WaitingForm())
+                            {
+                                fWait.Show();
+                                fWait.Refresh(); // Vẽ lại giao diện ngay lập tức
+
+                                try
+                                {
+
+                                    await Task.Run(() =>
+                                    {
+                                        PrintOrder(Convert.ToInt64(newOrder.data.value));
+                                        Thread.Sleep(3000);
+                                    });
+                                }
+                                catch (Exception ex)
+                                {
+                                    MessageBox.Show($"Lỗi trong quá trình in: {ex.Message}");
+                                }
+                                finally
+                                {
+                                    // 4. Đóng Form Waiting và mở lại nút bấm
+                                    fWait.Close();
+                                }
+                            }
+
+
+
+                            /*=============END Call in*/
+
+
+
+
+
+
+                           
                         }
                         else
                         {
@@ -510,9 +549,35 @@ namespace WinApp
             }
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private async void button1_Click(object sender, EventArgs e)
         {
-             PrintOrder(205881);
+            using (WaitingForm fWait = new WaitingForm())
+            {
+                fWait.Show();
+                fWait.Refresh(); // Vẽ lại giao diện ngay lập tức
+
+                try
+                {
+                   
+                    await Task.Run(() =>
+                    {
+                        PrintOrder(205881);
+                        Thread.Sleep(3000);
+                    });
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Lỗi trong quá trình in: {ex.Message}");
+                }
+                finally
+                {
+                    // 4. Đóng Form Waiting và mở lại nút bấm
+                    fWait.Close();
+                }
+            }
+
+
+
         }
 
 
