@@ -60,7 +60,7 @@
             Controls.Add(label1);
             FormBorderStyle = FormBorderStyle.None;
             Name = "WaitingForm";
-            StartPosition = FormStartPosition.CenterParent;
+            StartPosition = FormStartPosition.CenterScreen;
             Text = "WaitingForm";
             ResumeLayout(false);
             PerformLayout();

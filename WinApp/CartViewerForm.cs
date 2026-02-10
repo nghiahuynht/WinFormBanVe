@@ -313,6 +313,7 @@ namespace WinApp
                                 }
                                 catch (Exception ex)
                                 {
+                                    fWait.Close();
                                     MessageBox.Show($"Lỗi trong quá trình in: {ex.Message}");
                                 }
                                 finally
