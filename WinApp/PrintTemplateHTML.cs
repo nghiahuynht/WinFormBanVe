@@ -65,7 +65,7 @@ namespace WinApp
                             "<td colspan='3'>(Hai trăm tám mươi nghìn đồng)</td>" +
                         "</tr>" +
                          "<tr>" +
-                            "<td colspan='3'>Ngày: 10-02-2026</td>" +
+                            "<td colspan='3'>Ngày: "+ DateTime.Now.ToString("dd/MM/yyyy hh:mm tt") + "</td>" +
                         "</tr>" +
                          "<tr>" +
                             "<td colspan='3'><strong>(Vé chỉ có giá trị sử dụng trong ngày)</strong></td>" +
