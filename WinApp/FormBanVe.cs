@@ -1319,11 +1319,37 @@ namespace WinApp
             RelayoutCartBadge();  // ✅ bám góc phải ngay
 
             // Grid vé
+            // Grid vé + Logo
             int gridTop = 92;
+            const int logoH = 56;
+            const int logoGap = 10;
+
             gvMenu.Parent = leftCard;
             gvMenu.Location = new Point(16, gridTop);
-            gvMenu.Size = new Size(leftCard.ClientSize.Width - 32, leftCard.ClientSize.Height - (gridTop + 16));
-            gvMenu.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            gvMenu.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right; // bỏ Bottom để mình tự tính chiều cao
+
+            int gridH = leftCard.ClientSize.Height - (gridTop + logoGap + logoH + 16);
+            gvMenu.Size = new Size(leftCard.ClientSize.Width - 32, Math.Max(120, gridH));
+
+            // ===== LOGO (pictureBox2) đặt dưới danh sách vé =====
+            if (pictureBox2 != null)
+            {
+                pictureBox2.Parent = leftCard;
+                pictureBox2.Visible = true;
+                pictureBox2.BackColor = Color.Transparent;
+                pictureBox2.SizeMode = PictureBoxSizeMode.Zoom;
+                pictureBox2.Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;
+
+                pictureBox2.SetBounds(
+                    16,
+                    gvMenu.Bottom + logoGap,
+                    leftCard.ClientSize.Width - 32,
+                    logoH
+                );
+                pictureBox2.BringToFront();
+            }
+
+
 
             // ================= RIGHT STACK =================
             var rightStack = new TableLayoutPanel
@@ -1487,12 +1513,42 @@ namespace WinApp
                 cb_hinhthuc.Width = Math.Max(120, cardPay.ClientSize.Width - (cardPay.ClientSize.Width / 2) - 16);
                 cb_hinhthuc.Left = Math.Max(160, cardPay.ClientSize.Width / 2);
 
+                // ================= LEFT CARD: Grid + Logo (pictureBox2) =================
                 int gridTopLocal = 92;
-                gvMenu.Size = new Size(leftCard.ClientSize.Width - 32, leftCard.ClientSize.Height - (gridTopLocal + 16));
+
+                const int logoH2 = 200;   // ✅ chiều cao logo 200px
+                const int logoGap2 = 10;  // khoảng cách giữa grid và logo
+                const int sidePad = 16;   // padding trái/phải trong card
+
+                // Grid cao = card height - (top + gap + logo + bottom pad)
+                int gridH2 = leftCard.ClientSize.Height - (gridTopLocal + logoGap2 + logoH2 + sidePad);
+                gvMenu.Size = new Size(leftCard.ClientSize.Width - sidePad * 2, Math.Max(120, gridH2));
+                gvMenu.Location = new Point(sidePad, gridTopLocal);
+
+                if (pictureBox2 != null)
+                {
+                    pictureBox2.Parent = leftCard; // ✅ đảm bảo nằm trong leftCard
+                    pictureBox2.Visible = true;
+
+                    // ✅ ngang bằng "các loại vé" (bằng gvMenu)
+                    pictureBox2.SizeMode = PictureBoxSizeMode.Zoom;
+                    pictureBox2.BackColor = Color.Transparent;
+                    pictureBox2.Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;
+
+                    pictureBox2.SetBounds(
+                        gvMenu.Left,
+                        gvMenu.Bottom + logoGap2,
+                        gvMenu.Width,
+                        logoH2
+                    );
+
+                    pictureBox2.BringToFront();
+                }
 
                 // badge bám góc phải
                 RelayoutCartBadge();
 
+                // ================= RIGHT: keypad layout =================
                 keypadPanel.Width = keypadCard.ClientSize.Width - 32;
 
                 int totalBlockH = groupBox3.Height + 18 + keypadPanel.Height;
