@@ -13,6 +13,7 @@ namespace WinApp
     public static class PrintTemplateHTML
     {
         public static string imgsFolder = ConfigurationManager.AppSettings["ImageLibaryPath"];
+        public static string linkTraCuu = ConfigurationManager.AppSettings["LinkTraCuu"];
         public static string generateHTMLBill(TicketOrderHeaderModel header, long subId, string subCode,bool inGop)
         {
 
@@ -78,7 +79,7 @@ namespace WinApp
                                         "<strong>Mã đơn:</strong> " + header.Id + "<br/>" +
                                         "<strong>Số vé:</strong> " + subId + "<br/>" +
                                         "<strong>Mã tra cứu:</strong> " + subCode + "<br/>" +
-                                        "<strong>Link:</strong> bit.ly/langbiang" +
+                                        "<strong>Link: </strong>" + linkTraCuu+
                                 "</td>" +
                            "</tr>" +
                       "</table>" +
