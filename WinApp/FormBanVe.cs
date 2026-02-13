@@ -689,7 +689,7 @@ namespace WinApp
             ApplyThemePalette();
         }
 
-        // ✅✅✅ CHỈ THAY ĐOẠN NÀY: ApplyThemePalette (đừng đè ForeColor của badge nữa)
+
         private void ApplyThemePalette()
         {
             if (_coffeeMode)

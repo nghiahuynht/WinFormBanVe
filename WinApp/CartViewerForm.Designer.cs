@@ -46,12 +46,10 @@
             dataGridCartView.Name = "dataGridCartView";
             dataGridCartView.RowHeadersWidth = 51;
             dataGridCartView.RowTemplate.Height = 29;
-            dataGridCartView.Size = new Size(1212, 258);
+            dataGridCartView.Size = new Size(1586, 258);
             dataGridCartView.TabIndex = 0;
             dataGridCartView.CellContentClick += dataGridCartView_CellContentClick;
             dataGridCartView.CellFormatting += dataGridCartView_CellFormatting;
-            dataGridCartView.CellMouseEnter += dataGridCartView_CellMouseEnter;
-            dataGridCartView.CellMouseLeave += dataGridCartView_CellMouseLeave;
             // 
             // label1
             // 
@@ -116,7 +114,7 @@
             // 
             // button1
             // 
-            button1.Location = new Point(1140, 308);
+            button1.Location = new Point(1355, 310);
             button1.Name = "button1";
             button1.Size = new Size(94, 29);
             button1.TabIndex = 9;
@@ -129,7 +127,7 @@
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(192, 255, 192);
-            ClientSize = new Size(1258, 361);
+            ClientSize = new Size(1642, 361);
             Controls.Add(button1);
             Controls.Add(txtTienKhachDua);
             Controls.Add(lblTienThoi);
@@ -139,6 +137,7 @@
             Controls.Add(label1);
             Controls.Add(dataGridCartView);
             Name = "CartViewerForm";
+            StartPosition = FormStartPosition.CenterScreen;
             Text = "DANH SÁCH ĐƠN ĐANG BÁN";
             Load += CartViewerForm_Load;
             ((System.ComponentModel.ISupportInitialize)dataGridCartView).EndInit();

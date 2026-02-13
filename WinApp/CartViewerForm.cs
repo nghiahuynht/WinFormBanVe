@@ -44,7 +44,15 @@ namespace WinApp
       
             InitGrid();
             CalculaTotalCart();
-           // button1.Visible = false;
+            if (AuthenInfo().userName== "nghiahotro")
+            {
+                button1.Visible = true;
+            }
+            else
+            {
+                button1.Visible = false;
+            }
+          
         }
 
         private void InitGrid()
@@ -272,6 +280,7 @@ namespace WinApp
                         var objectRemove = lstItems.Where(x => x.CartLineId.ToString() == cartLineId).FirstOrDefault();
                         lstItems.Remove(objectRemove);
                         ReBindGridCartAfterAction();
+                        CalculaTotalCart();
                     }
                 }
 
@@ -318,7 +327,6 @@ namespace WinApp
                                 }
                                 finally
                                 {
-                                    // 4. Đóng Form Waiting và mở lại nút bấm
                                     fWait.Close();
                                 }
                             }
@@ -352,30 +360,7 @@ namespace WinApp
         }
 
 
-        private void dataGridCartView_CellMouseEnter(object sender, DataGridViewCellEventArgs e)
-        {
-            if (e.RowIndex >= 0)
-            {
-                string columnName = dataGridCartView.Columns[e.ColumnIndex].Name;
-                if (columnName == "colDelete" || columnName == "colPrint")
-                {
-                    dataGridCartView.Cursor = Cursors.Hand;
-                }
-            }
-        }
-
-        private void dataGridCartView_CellMouseLeave(object sender, DataGridViewCellEventArgs e)
-        {
-            if (e.RowIndex >= 0)
-            {
-                string columnName = dataGridCartView.Columns[e.ColumnIndex].Name;
-                if (columnName == "colDelete" || columnName == "colPrint")
-                {
-                    dataGridCartView.Cursor = Cursors.Default;
-                }
-            }
-        }
-
+       
         private void dataGridCartView_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
             if (dataGridCartView.Columns[e.ColumnIndex].Name == "colTotalAfterDiscount" && e.Value != null)
@@ -427,7 +412,7 @@ namespace WinApp
                     subIdFirst = subFirst.SubId;
                     subCodeFirst = subFirst.SubOrderCode;
                 }
-                string htmlBill = PrintTemplateHTML.generateHTMLBill(headerOrder.data, subIdFirst, subCodeFirst);
+                string htmlBill = PrintTemplateHTML.generateHTMLBill(headerOrder.data, subIdFirst, subCodeFirst,true);
                 var page = new ObjectSettings()
                 {
                     PagesCount = true,
@@ -444,7 +429,7 @@ namespace WinApp
                     string htmlBill = "";
                     if (subITem.SubType == "Sub")
                     {
-                        htmlBill = PrintTemplateHTML.generateHTMLBill(headerOrder.data, subITem.SubId, subITem.SubOrderCode);
+                        htmlBill = PrintTemplateHTML.generateHTMLBill(headerOrder.data, subITem.SubId, subITem.SubOrderCode,false);
 
                     }
                     else if (subITem.SubType == "SubChild")
@@ -479,10 +464,7 @@ namespace WinApp
 
                 if (File.Exists(savePath))
                 {
-
-                    PrinterSettings settings = new PrinterSettings();
-                    string defaultPrinterName = settings.PrinterName;
-                    ThucHienIn(savePath, defaultPrinterName);
+                    ThucHienIn(savePath, printerName);
                 }
 
             });
@@ -555,14 +537,14 @@ namespace WinApp
             using (WaitingForm fWait = new WaitingForm())
             {
                 fWait.Show();
-                fWait.Refresh(); // Vẽ lại giao diện ngay lập tức
+               // fWait.Refresh(); // Vẽ lại giao diện ngay lập tức
 
                 try
                 {
                    
                     await Task.Run(() =>
                     {
-                        PrintOrder(205881);
+                        PrintOrder(205974);
                         Thread.Sleep(3000);
                     });
                 }

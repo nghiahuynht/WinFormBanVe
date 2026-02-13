@@ -1,4 +1,5 @@
-﻿using GM_DAL.Models.TicketOrder;
+﻿using DocumentFormat.OpenXml.Office.Y2022.FeaturePropertyBag;
+using GM_DAL.Models.TicketOrder;
 using QRCoder;
 using System;
 using System.Collections.Generic;
@@ -12,17 +13,18 @@ namespace WinApp
     public static class PrintTemplateHTML
     {
         public static string imgsFolder = ConfigurationManager.AppSettings["ImageLibaryPath"];
-        public static string generateHTMLBill(TicketOrderHeaderModel header, long subId, string subCode)
+        public static string generateHTMLBill(TicketOrderHeaderModel header, long subId, string subCode,bool inGop)
         {
 
             string folderPath = imgsFolder.Replace('\\', '/');
             string fullImagePathLogo = $"file:///{folderPath}/logo-langbian-land.jpg";
 
             string itemHtml = "";
-
+            int soluong = (inGop == true ? header.Quanti : 1);
+            decimal total = (inGop == true ? header.Total : header.Price);
             if (header.DiscountPercent > 0)
             {
-                decimal total = header.Total;
+                ;
                 itemHtml = "<table style='width:430px;border-collapse:collapse;' border='1'  >";
                 string phanTramKM = header.DiscountPercent.ToString() + "%";
                 string tienKM = header.DiscountedAmount.ToString();
@@ -55,9 +57,9 @@ namespace WinApp
                             "<th>Thành tiền</th>" +
                         "</tr>" +
                         "<tr>" +
-                            "<td>140,000</td>" +
-                            "<td>2</td>" +
-                            "<td>280,000</td>" +
+                            "<td>"+ header.Price.ToString("N0") + "</td>" +
+                            "<td>"+ soluong + "</td>" +
+                            "<td>"+ total.ToString("N0") + "</td>" +
                         "</tr>" +
                          "<tr>" +
                             "<td colspan='3'>(Hai trăm tám mươi nghìn đồng)</td>" +
