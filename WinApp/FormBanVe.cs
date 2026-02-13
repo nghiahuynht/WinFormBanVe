@@ -1556,9 +1556,9 @@ namespace WinApp
                 Padding = new Padding(0)
             };
 
-            // ✅ INFO giảm 30% (36 -> 25.2), phần giảm bù sang PAY (24 -> 34.8), PRICE giữ nguyên 40
-            topCards.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25.2f)); // THÔNG TIN
-            topCards.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 40.0f)); // BẢNG GIÁ
+            // ✅ BẢNG GIÁ giảm 10% (40 -> 36), phần giảm +4 bù sang THÔNG TIN (25.2 -> 29.2), THANH TOÁN giữ 34.8
+            topCards.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 29.2f)); // THÔNG TIN
+            topCards.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 36.0f)); // BẢNG GIÁ
             topCards.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 34.8f)); // THANH TOÁN
 
             rightStack.Controls.Add(topCards, 0, 0);
@@ -1721,7 +1721,7 @@ namespace WinApp
                 _lblKhachDua.Location = new Point(xL, yLabel3);
                 txtkhachdua.SetBounds(xL, yInput3, innerW, INPUT_H);
 
-                // PAY (to hơn -> combo hình thức rộng hơn)
+                // PAY
                 int xPay = Math.Max(160, cardPay.ClientSize.Width / 2);
                 lbHinhThuc.Location = new Point(xPay, 62);
 
