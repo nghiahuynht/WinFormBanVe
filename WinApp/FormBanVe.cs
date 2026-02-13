@@ -904,25 +904,21 @@ namespace WinApp
             gvMenu.GridColor = _border;
             gvMenu.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(241, 245, 249);
             gvMenu.ColumnHeadersDefaultCellStyle.ForeColor = _text;
-            gvMenu.DefaultCellStyle.SelectionBackColor = _selectedRed; // ✅ đỏ nhẹ
+            gvMenu.DefaultCellStyle.SelectionBackColor = _selectedRed;
             gvMenu.DefaultCellStyle.SelectionForeColor = _text;
 
-            // chặn header bị đổi màu
             gvMenu.ColumnHeadersDefaultCellStyle.SelectionBackColor = gvMenu.ColumnHeadersDefaultCellStyle.BackColor;
             gvMenu.ColumnHeadersDefaultCellStyle.SelectionForeColor = gvMenu.ColumnHeadersDefaultCellStyle.ForeColor;
 
-
             lblthanhtien.ForeColor = _accent1;
 
-            // ✅ +1 size cho "LOẠI ĐƠN" (GroupBox + radios)
             StyleLoaiDonGroup();
         }
 
-        // ✅ +1 size combo text cho khu THÔNG TIN/BẢNG GIÁ/THANH TOÁN
         private void StyleCombo(ComboBox cb)
         {
             cb.FlatStyle = FlatStyle.Flat;
-            cb.Font = F(11, false); // ✅ 10 -> 11
+            cb.Font = F(11, false);
             cb.BackColor = Color.White;
             cb.ForeColor = _text;
         }
@@ -936,6 +932,25 @@ namespace WinApp
 
             border.Width = width;
             border.Height = COMBO_BORDER_H;
+        }
+
+        // ✅ NEW: move cả cái khung border (outer) của combo
+        private void MoveComboBorder(ComboBox cb, Control parent, int x, int y, int width)
+        {
+            if (cb == null || parent == null) return;
+
+            // nếu chưa wrap thì wrap luôn
+            WrapComboWithBorder(cb);
+
+            var inner = cb.Parent as Panel;
+            var border = inner?.Parent as Panel;
+            if (border == null || border.Tag?.ToString() != "cb_border") return;
+
+            border.Parent = parent;
+            border.Location = new Point(x, y);
+            border.Size = new Size(Math.Max(160, width), COMBO_BORDER_H);
+            border.Anchor = AnchorStyles.Top | AnchorStyles.Left; // ✅ tránh bung full width theo parent
+            border.BringToFront();
         }
 
         private void StyleNumeric(NumericUpDown n)
@@ -982,7 +997,6 @@ namespace WinApp
             b.Font = F(11, true);
         }
 
-        // ✅ +1 size cho Title/SubTitle các card: THÔNG TIN / BẢNG GIÁ / THANH TOÁN / (và các card khác)
         private Panel CreateCard(string title, string subtitle)
         {
             var card = new CardPanel
@@ -1001,7 +1015,7 @@ namespace WinApp
                 Parent = card,
                 AutoSize = true,
                 Text = title,
-                Font = F(12, true),      // ✅ 11 -> 12
+                Font = F(12, true),
                 ForeColor = _text,
                 Location = new Point(16, 14)
             };
@@ -1011,7 +1025,7 @@ namespace WinApp
                 Parent = card,
                 AutoSize = true,
                 Text = subtitle,
-                Font = F(10, false),     // ✅ 9 -> 10
+                Font = F(10, false),
                 ForeColor = _muted,
                 Location = new Point(16, 38)
             };
@@ -1019,7 +1033,6 @@ namespace WinApp
             return card;
         }
 
-        // ✅ +1 size cho label con trong card (Loại khách/Khách hàng/Đối tượng…)
         private void PlaceLabel(Control parent, string text, int x, int y)
         {
             _ = new Label
@@ -1028,7 +1041,7 @@ namespace WinApp
                 Text = text,
                 AutoSize = true,
                 ForeColor = _muted,
-                Font = F(10, true),      // ✅ 9 -> 10
+                Font = F(10, true),
                 Location = new Point(x, y)
             };
         }
@@ -1078,7 +1091,9 @@ namespace WinApp
             WrapComboWithBorder(cb_khachhang);
             WrapComboWithBorder(cb_doituong);
             WrapComboWithBorder(cb_hinhthuc);
-            WrapComboWithBorder(cb_kieuin);
+
+            // ❌ QUAN TRỌNG: không wrap cb_kieuin ở đây (lúc này nó chưa nằm trong keypadCard)
+            // WrapComboWithBorder(cb_kieuin);
         }
 
         private void MoveControl(Control c, Control parent, int x, int y, int width)
@@ -1111,22 +1126,21 @@ namespace WinApp
             b.Margin = new Padding(10);
         }
 
-        // ✅ +1 size cho "LOẠI ĐƠN" (GroupBox + radios)
         private void StyleLoaiDonGroup()
         {
             if (groupBox3 == null) return;
 
-            groupBox3.Font = F(11, true);  // ✅ title groupbox +1
+            groupBox3.Font = F(11, true);
             groupBox3.ForeColor = _text;
 
             if (rad_binhthuong != null)
             {
-                rad_binhthuong.Font = F(11, false); // ✅ +1
+                rad_binhthuong.Font = F(11, false);
                 rad_binhthuong.ForeColor = _text;
             }
             if (rad_mienphi != null)
             {
-                rad_mienphi.Font = F(11, false);    // ✅ +1
+                rad_mienphi.Font = F(11, false);
                 rad_mienphi.ForeColor = _text;
             }
         }
@@ -1456,9 +1470,7 @@ namespace WinApp
             }
 
             var lblTitle = leftCard.Controls.OfType<Label>().FirstOrDefault(l => l.Text == "GIỎ HÀNG / ĐƠN ĐANG BÁN");
-            var lblSub = leftCard.Controls.OfType<Label>().FirstOrDefault(l => l.Text == "Chọn vé bên dưới");
             if (lblTitle != null) lblTitle.Location = new Point(52, 14);
-            if (lblSub != null) lblSub.Location = new Point(52, 38);
 
             if (label2 != null) label2.Visible = false;
 
@@ -1521,32 +1533,9 @@ namespace WinApp
             RelayoutCartBadge();
 
             int gridTop = 92;
-            const int logoH = 56;
-            const int logoGap = 10;
-
             gvMenu.Parent = leftCard;
             gvMenu.Location = new Point(16, gridTop);
             gvMenu.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-
-            int gridH = leftCard.ClientSize.Height - (gridTop + logoGap + logoH + 16);
-            gvMenu.Size = new Size(leftCard.ClientSize.Width - 32, Math.Max(120, gridH));
-
-            if (pictureBox2 != null)
-            {
-                pictureBox2.Parent = leftCard;
-                pictureBox2.Visible = true;
-                pictureBox2.BackColor = Color.Transparent;
-                pictureBox2.SizeMode = PictureBoxSizeMode.Zoom;
-                pictureBox2.Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;
-
-                pictureBox2.SetBounds(
-                    16,
-                    gvMenu.Bottom + logoGap,
-                    leftCard.ClientSize.Width - 32,
-                    logoH
-                );
-                pictureBox2.BringToFront();
-            }
 
             // ================= RIGHT STACK =================
             var rightStack = new TableLayoutPanel
@@ -1573,7 +1562,6 @@ namespace WinApp
             topCards.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 30f));
             rightStack.Controls.Add(topCards, 0, 0);
 
-            // ✅ CreateCard đã +1 size title/subtitle => THÔNG TIN / BẢNG GIÁ / THANH TOÁN tự tăng
             var cardInfo = CreateCard("THÔNG TIN", "Loại khách / Khách hàng / Đối tượng");
             var cardPrice = CreateCard("BẢNG GIÁ", "Đơn giá / Số lượng / Khuyến mãi");
             var cardPay = CreateCard("THANH TOÁN", "Tổng tiền & tiền thối");
@@ -1610,7 +1598,7 @@ namespace WinApp
                 Text = "Khách đưa",
                 AutoSize = true,
                 ForeColor = _muted,
-                Font = F(10, true), // ✅ +1 cho label này luôn (9 -> 10)
+                Font = F(10, true),
                 Location = new Point(16, 330)
             };
             txtkhachdua.Parent = cardPrice;
@@ -1647,8 +1635,16 @@ namespace WinApp
                 Font = F(9, true)
             };
 
+            // ✅ FIX CỨNG: reset Dock/Anchor trước khi wrap lại trong keypadCard
             cb_kieuin.Parent = keypadCard;
             cb_kieuin.DropDownStyle = ComboBoxStyle.DropDownList;
+            cb_kieuin.Dock = DockStyle.None;                 // ✅ quan trọng (tránh bung full width)
+            cb_kieuin.Anchor = AnchorStyles.Top | AnchorStyles.Left;
+            cb_kieuin.Location = new Point(10, 10);
+            cb_kieuin.Width = 200;
+
+            // ✅ wrap border đúng parent mới (keypadCard)
+            WrapComboWithBorder(cb_kieuin);
 
             var keypadPanel = new TableLayoutPanel
             {
@@ -1711,37 +1707,6 @@ namespace WinApp
                 cb_hinhthuc.Width = Math.Max(120, cardPay.ClientSize.Width - (cardPay.ClientSize.Width / 2) - 16);
                 cb_hinhthuc.Left = Math.Max(160, cardPay.ClientSize.Width / 2);
 
-                int gridTopLocal = 92;
-
-                const int logoH2 = 200;
-                const int logoGap2 = 10;
-                const int sidePad = 16;
-
-                int gridH2 = leftCard.ClientSize.Height - (gridTopLocal + logoGap2 + logoH2 + sidePad);
-                gvMenu.Size = new Size(leftCard.ClientSize.Width - sidePad * 2, Math.Max(120, gridH2));
-                gvMenu.Location = new Point(sidePad, gridTopLocal);
-
-                if (pictureBox2 != null)
-                {
-                    pictureBox2.Parent = leftCard;
-                    pictureBox2.Visible = true;
-
-                    pictureBox2.SizeMode = PictureBoxSizeMode.Zoom;
-                    pictureBox2.BackColor = Color.Transparent;
-                    pictureBox2.Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;
-
-                    pictureBox2.SetBounds(
-                        gvMenu.Left,
-                        gvMenu.Bottom + logoGap2,
-                        gvMenu.Width,
-                        logoH2
-                    );
-
-                    pictureBox2.BringToFront();
-                }
-
-                RelayoutCartBadge();
-
                 keypadPanel.Width = keypadCard.ClientSize.Width - 32;
 
                 int totalBlockH = groupBox3.Height + 18 + keypadPanel.Height;
@@ -1754,23 +1719,25 @@ namespace WinApp
                 keypadPanel.Left = 16;
                 keypadPanel.Top = groupBox3.Bottom + 18;
 
+                // ✅ KIEU IN: đặt đúng vị trí vàng (bên phải groupBox3, combo nằm dưới label)
                 int xKieuIn = groupBox3.Right + 24;
                 int yKieuIn = groupBox3.Top + 6;
 
                 _lblKieuIn.Location = new Point(xKieuIn, yKieuIn);
 
-                int comboTop = yKieuIn + 22;
                 int maxW = keypadCard.ClientSize.Width - xKieuIn - 16;
-                int wKieuIn = Math.Max(160, Math.Min(260, maxW));
+                int wKieuIn = Math.Max(160, Math.Min(320, maxW));
 
-                cb_kieuin.Location = new Point(xKieuIn, comboTop);
-                cb_kieuin.Size = new Size(wKieuIn, cb_kieuin.Height);
+                int comboTop = _lblKieuIn.Bottom + 6;
 
+                // ✅ canh bằng border panel (outer) để không bị nhảy
+                MoveComboBorder(cb_kieuin, keypadCard, xKieuIn, comboTop, wKieuIn);
+
+                // nếu hẹp quá -> kéo xuống dưới như cũ
                 if (maxW < 170)
                 {
                     _lblKieuIn.Location = new Point(16, groupBox3.Bottom + 10);
-                    cb_kieuin.Location = new Point(16, _lblKieuIn.Bottom + 6);
-                    cb_kieuin.Width = keypadCard.ClientSize.Width - 32;
+                    MoveComboBorder(cb_kieuin, keypadCard, 16, _lblKieuIn.Bottom + 6, keypadCard.ClientSize.Width - 32);
                 }
 
                 RelayoutUserFlow();
