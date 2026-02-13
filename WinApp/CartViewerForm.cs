@@ -252,8 +252,14 @@ namespace WinApp
 
         private void CalculaTotalCart()
         {
+            decimal khachdua = 0;
+            if (!string.IsNullOrEmpty(txtTienKhachDua.Text))
+            {
+                khachdua= Convert.ToDecimal(txtTienKhachDua.Text);
+            }
+
+
             decimal totalCart = lstItems.Sum(x => x.TotalAfterDiscount);
-            decimal khachdua = Convert.ToDecimal(txtTienKhachDua.Text);
             decimal tienthoi = khachdua - totalCart;
             lblTotalCart.Text = totalCart.ToString("N0");
             lblTienThoi.Text = tienthoi.ToString("N0");
@@ -334,11 +340,6 @@ namespace WinApp
 
 
                             /*=============END Call in*/
-
-
-
-
-
 
                            
                         }

@@ -1730,10 +1730,10 @@ namespace WinApp
 
                 int comboTop = _lblKieuIn.Bottom + 6;
 
-                // ✅ canh bằng border panel (outer) để không bị nhảy
+
                 MoveComboBorder(cb_kieuin, keypadCard, xKieuIn, comboTop, wKieuIn);
 
-                // nếu hẹp quá -> kéo xuống dưới như cũ
+
                 if (maxW < 170)
                 {
                     _lblKieuIn.Location = new Point(16, groupBox3.Bottom + 10);
