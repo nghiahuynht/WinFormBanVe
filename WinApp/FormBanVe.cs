@@ -427,7 +427,6 @@ namespace WinApp
             _selectedTicketCode = code;
             gvMenu.ClearSelection();
 
-            // reset nền các dòng vé
             foreach (DataGridViewRow r in gvMenu.Rows)
             {
                 if (r.Tag is TicketModel)
@@ -438,7 +437,6 @@ namespace WinApp
                 }
             }
 
-            // select + tô đỏ nhạt dòng hiện tại
             row.Selected = true;
             row.DefaultCellStyle.BackColor = _selectedRed;
             row.DefaultCellStyle.SelectionBackColor = _selectedRed;
@@ -491,7 +489,7 @@ namespace WinApp
                 if (!row.Selected)
                     row.DefaultCellStyle.BackColor = Color.White;
                 else
-                    row.DefaultCellStyle.BackColor = _selectedRed; // ✅ giữ đỏ nếu đang chọn
+                    row.DefaultCellStyle.BackColor = _selectedRed;
             }
 
             _hoverRowIndex = -1;
@@ -934,12 +932,10 @@ namespace WinApp
             border.Height = COMBO_BORDER_H;
         }
 
-        // ✅ NEW: move cả cái khung border (outer) của combo
         private void MoveComboBorder(ComboBox cb, Control parent, int x, int y, int width)
         {
             if (cb == null || parent == null) return;
 
-            // nếu chưa wrap thì wrap luôn
             WrapComboWithBorder(cb);
 
             var inner = cb.Parent as Panel;
@@ -949,7 +945,7 @@ namespace WinApp
             border.Parent = parent;
             border.Location = new Point(x, y);
             border.Size = new Size(Math.Max(160, width), COMBO_BORDER_H);
-            border.Anchor = AnchorStyles.Top | AnchorStyles.Left; // ✅ tránh bung full width theo parent
+            border.Anchor = AnchorStyles.Top | AnchorStyles.Left;
             border.BringToFront();
         }
 
@@ -1091,9 +1087,7 @@ namespace WinApp
             WrapComboWithBorder(cb_khachhang);
             WrapComboWithBorder(cb_doituong);
             WrapComboWithBorder(cb_hinhthuc);
-
-            // ❌ QUAN TRỌNG: không wrap cb_kieuin ở đây (lúc này nó chưa nằm trong keypadCard)
-            // WrapComboWithBorder(cb_kieuin);
+            // cb_kieuin: wrap sau khi đã parent=keypadCard
         }
 
         private void MoveControl(Control c, Control parent, int x, int y, int width)
@@ -1268,7 +1262,6 @@ namespace WinApp
             groupBox1.Visible = false;
             groupBox2.Visible = false;
 
-            // ================= HEADER =================
             _header = new GradientPanel(_accent2, _accent1)
             {
                 Dock = DockStyle.Top,
@@ -1440,7 +1433,6 @@ namespace WinApp
             rightHeader.Resize += (s, e) => RelayoutUserFlow();
             RelayoutUserFlow();
 
-            // ================= MAIN GRID =================
             _mainGrid = new TableLayoutPanel
             {
                 Dock = DockStyle.Fill,
@@ -1454,7 +1446,6 @@ namespace WinApp
             this.Controls.Add(_mainGrid);
             _mainGrid.BringToFront();
 
-            // ================= LEFT CARD =================
             var leftCard = CreateCard("GIỎ HÀNG / ĐƠN ĐANG BÁN", "");
             _leftCardRef = leftCard;
             leftCard.Dock = DockStyle.Fill;
@@ -1537,7 +1528,6 @@ namespace WinApp
             gvMenu.Location = new Point(16, gridTop);
             gvMenu.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
 
-            // ================= RIGHT STACK =================
             var rightStack = new TableLayoutPanel
             {
                 Dock = DockStyle.Fill,
@@ -1635,15 +1625,13 @@ namespace WinApp
                 Font = F(9, true)
             };
 
-            // ✅ FIX CỨNG: reset Dock/Anchor trước khi wrap lại trong keypadCard
             cb_kieuin.Parent = keypadCard;
             cb_kieuin.DropDownStyle = ComboBoxStyle.DropDownList;
-            cb_kieuin.Dock = DockStyle.None;                 // ✅ quan trọng (tránh bung full width)
+            cb_kieuin.Dock = DockStyle.None;
             cb_kieuin.Anchor = AnchorStyles.Top | AnchorStyles.Left;
             cb_kieuin.Location = new Point(10, 10);
             cb_kieuin.Width = 200;
 
-            // ✅ wrap border đúng parent mới (keypadCard)
             WrapComboWithBorder(cb_kieuin);
 
             var keypadPanel = new TableLayoutPanel
@@ -1719,25 +1707,24 @@ namespace WinApp
                 keypadPanel.Left = 16;
                 keypadPanel.Top = groupBox3.Bottom + 18;
 
-                // ✅ KIEU IN: đặt đúng vị trí vàng (bên phải groupBox3, combo nằm dưới label)
+                // ✅ KIEU IN: nhích lên 3px (label + combo + border)
+                int lift = 3;
+
                 int xKieuIn = groupBox3.Right + 24;
-                int yKieuIn = groupBox3.Top + 6;
+                int yKieuIn = groupBox3.Top + 6 - lift;
 
                 _lblKieuIn.Location = new Point(xKieuIn, yKieuIn);
 
                 int maxW = keypadCard.ClientSize.Width - xKieuIn - 16;
                 int wKieuIn = Math.Max(160, Math.Min(320, maxW));
 
-                int comboTop = _lblKieuIn.Bottom + 6;
-
-                // ✅ canh bằng border panel (outer) để không bị nhảy
+                int comboTop = _lblKieuIn.Bottom + 6 - lift;
                 MoveComboBorder(cb_kieuin, keypadCard, xKieuIn, comboTop, wKieuIn);
 
-                // nếu hẹp quá -> kéo xuống dưới như cũ
                 if (maxW < 170)
                 {
-                    _lblKieuIn.Location = new Point(16, groupBox3.Bottom + 10);
-                    MoveComboBorder(cb_kieuin, keypadCard, 16, _lblKieuIn.Bottom + 6, keypadCard.ClientSize.Width - 32);
+                    _lblKieuIn.Location = new Point(16, groupBox3.Bottom + 10 - lift);
+                    MoveComboBorder(cb_kieuin, keypadCard, 16, _lblKieuIn.Bottom + 6 - lift, keypadCard.ClientSize.Width - 32);
                 }
 
                 RelayoutUserFlow();
