@@ -247,18 +247,20 @@
             // txtkhachdua
             // 
             txtkhachdua.Enabled = false;
+            txtkhachdua.Font = new Font("Segoe UI", 11F, FontStyle.Regular, GraphicsUnit.Point);
             txtkhachdua.Location = new Point(334, 329);
             txtkhachdua.Name = "txtkhachdua";
-            txtkhachdua.Size = new Size(150, 27);
+            txtkhachdua.Size = new Size(150, 32);
             txtkhachdua.TabIndex = 45;
             txtkhachdua.ValueChanged += txtkhachdua_ValueChanged;
             // 
             // txtkhuyenmai
             // 
             txtkhuyenmai.Enabled = false;
+            txtkhuyenmai.Font = new Font("Segoe UI", 11F, FontStyle.Regular, GraphicsUnit.Point);
             txtkhuyenmai.Location = new Point(99, 233);
             txtkhuyenmai.Name = "txtkhuyenmai";
-            txtkhuyenmai.Size = new Size(150, 27);
+            txtkhuyenmai.Size = new Size(150, 32);
             txtkhuyenmai.TabIndex = 44;
             txtkhuyenmai.ValueChanged += txtkhuyenmai_ValueChanged;
             // 
@@ -273,19 +275,21 @@
             // txtsoluong
             // 
             txtsoluong.Enabled = false;
+            txtsoluong.Font = new Font("Segoe UI", 11F, FontStyle.Regular, GraphicsUnit.Point);
             txtsoluong.Location = new Point(334, 133);
             txtsoluong.Name = "txtsoluong";
-            txtsoluong.Size = new Size(150, 27);
+            txtsoluong.Size = new Size(150, 32);
             txtsoluong.TabIndex = 42;
             txtsoluong.Value = new decimal(new int[] { 1, 0, 0, 0 });
             txtsoluong.ValueChanged += txtsoluong_ValueChanged;
             // 
             // cb_kieuin
             // 
+            cb_kieuin.Font = new Font("Segoe UI", 11F, FontStyle.Regular, GraphicsUnit.Point);
             cb_kieuin.FormattingEnabled = true;
             cb_kieuin.Location = new Point(538, 412);
             cb_kieuin.Name = "cb_kieuin";
-            cb_kieuin.Size = new Size(120, 28);
+            cb_kieuin.Size = new Size(120, 33);
             cb_kieuin.TabIndex = 41;
             // 
             // label15
@@ -712,7 +716,6 @@
             // 
             // pictureBox2
             // 
-            pictureBox2.Image = (Image)resources.GetObject("pictureBox2.Image");
             pictureBox2.Location = new Point(326, 9);
             pictureBox2.Name = "pictureBox2";
             pictureBox2.Size = new Size(144, 66);

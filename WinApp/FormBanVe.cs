@@ -30,6 +30,7 @@ namespace WinApp
 
         private const int COMBO_BORDER_H = 42;
         private const int COMBO_INNER_PAD_Y = 6;
+        private const int INPUT_H = 42; // numeric/textbox cao & cân với combobox
 
         private Panel _cartBadgeHost;
 
@@ -427,7 +428,6 @@ namespace WinApp
             _selectedTicketCode = code;
             gvMenu.ClearSelection();
 
-            // reset nền các dòng vé
             foreach (DataGridViewRow r in gvMenu.Rows)
             {
                 if (r.Tag is TicketModel)
@@ -438,7 +438,6 @@ namespace WinApp
                 }
             }
 
-            // select + tô đỏ nhạt dòng hiện tại
             row.Selected = true;
             row.DefaultCellStyle.BackColor = _selectedRed;
             row.DefaultCellStyle.SelectionBackColor = _selectedRed;
@@ -491,7 +490,7 @@ namespace WinApp
                 if (!row.Selected)
                     row.DefaultCellStyle.BackColor = Color.White;
                 else
-                    row.DefaultCellStyle.BackColor = _selectedRed; // ✅ giữ đỏ nếu đang chọn
+                    row.DefaultCellStyle.BackColor = _selectedRed;
             }
 
             _hoverRowIndex = -1;
@@ -889,9 +888,11 @@ namespace WinApp
             StyleNumeric(txtkhachdua);
 
             txttienKM.BorderStyle = BorderStyle.FixedSingle;
-            txttienKM.Font = F(10, false);
+            txttienKM.Font = F(11, false);
             txttienKM.BackColor = Color.White;
             txttienKM.ForeColor = _text;
+            try { txttienKM.AutoSize = false; } catch { }
+            txttienKM.Height = INPUT_H;
 
             StyleKeypad(nut0); StyleKeypad(nut1); StyleKeypad(nut2); StyleKeypad(nut3); StyleKeypad(nut4);
             StyleKeypad(nut5); StyleKeypad(nut6); StyleKeypad(nut7); StyleKeypad(nut8); StyleKeypad(nut9);
@@ -934,12 +935,10 @@ namespace WinApp
             border.Height = COMBO_BORDER_H;
         }
 
-        // ✅ NEW: move cả cái khung border (outer) của combo
         private void MoveComboBorder(ComboBox cb, Control parent, int x, int y, int width)
         {
             if (cb == null || parent == null) return;
 
-            // nếu chưa wrap thì wrap luôn
             WrapComboWithBorder(cb);
 
             var inner = cb.Parent as Panel;
@@ -949,15 +948,20 @@ namespace WinApp
             border.Parent = parent;
             border.Location = new Point(x, y);
             border.Size = new Size(Math.Max(160, width), COMBO_BORDER_H);
-            border.Anchor = AnchorStyles.Top | AnchorStyles.Left; // ✅ tránh bung full width theo parent
+            border.Anchor = AnchorStyles.Top | AnchorStyles.Left;
             border.BringToFront();
         }
 
         private void StyleNumeric(NumericUpDown n)
         {
-            n.Font = F(10, false);
+            n.Font = F(11, false);
             n.BackColor = Color.White;
             n.ForeColor = _text;
+            n.BorderStyle = BorderStyle.FixedSingle;
+
+            try { n.AutoSize = false; } catch { }
+            n.Height = INPUT_H;
+            n.MinimumSize = new Size(0, INPUT_H);
         }
 
         private void StyleKeypad(Button b)
@@ -1033,9 +1037,9 @@ namespace WinApp
             return card;
         }
 
-        private void PlaceLabel(Control parent, string text, int x, int y)
+        private Label PlaceLabel(Control parent, string text, int x, int y)
         {
-            _ = new Label
+            var lb = new Label
             {
                 Parent = parent,
                 Text = text,
@@ -1044,6 +1048,7 @@ namespace WinApp
                 Font = F(10, true),
                 Location = new Point(x, y)
             };
+            return lb;
         }
 
         private void WrapComboWithBorder(ComboBox cb)
@@ -1091,9 +1096,6 @@ namespace WinApp
             WrapComboWithBorder(cb_khachhang);
             WrapComboWithBorder(cb_doituong);
             WrapComboWithBorder(cb_hinhthuc);
-
-            // ❌ QUAN TRỌNG: không wrap cb_kieuin ở đây (lúc này nó chưa nằm trong keypadCard)
-            // WrapComboWithBorder(cb_kieuin);
         }
 
         private void MoveControl(Control c, Control parent, int x, int y, int width)
@@ -1268,7 +1270,6 @@ namespace WinApp
             groupBox1.Visible = false;
             groupBox2.Visible = false;
 
-            // ================= HEADER =================
             _header = new GradientPanel(_accent2, _accent1)
             {
                 Dock = DockStyle.Top,
@@ -1440,7 +1441,6 @@ namespace WinApp
             rightHeader.Resize += (s, e) => RelayoutUserFlow();
             RelayoutUserFlow();
 
-            // ================= MAIN GRID =================
             _mainGrid = new TableLayoutPanel
             {
                 Dock = DockStyle.Fill,
@@ -1454,7 +1454,6 @@ namespace WinApp
             this.Controls.Add(_mainGrid);
             _mainGrid.BringToFront();
 
-            // ================= LEFT CARD =================
             var leftCard = CreateCard("GIỎ HÀNG / ĐƠN ĐANG BÁN", "");
             _leftCardRef = leftCard;
             leftCard.Dock = DockStyle.Fill;
@@ -1537,7 +1536,6 @@ namespace WinApp
             gvMenu.Location = new Point(16, gridTop);
             gvMenu.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
 
-            // ================= RIGHT STACK =================
             var rightStack = new TableLayoutPanel
             {
                 Dock = DockStyle.Fill,
@@ -1557,9 +1555,12 @@ namespace WinApp
                 RowCount = 1,
                 Padding = new Padding(0)
             };
-            topCards.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 40f));
-            topCards.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 30f));
-            topCards.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 30f));
+
+            // ✅ BẢNG GIÁ giảm 10% (40 -> 36), phần giảm +4 bù sang THÔNG TIN (25.2 -> 29.2), THANH TOÁN giữ 34.8
+            topCards.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 29.2f)); // THÔNG TIN
+            topCards.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 36.0f)); // BẢNG GIÁ
+            topCards.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 34.8f)); // THANH TOÁN
+
             rightStack.Controls.Add(topCards, 0, 0);
 
             var cardInfo = CreateCard("THÔNG TIN", "Loại khách / Khách hàng / Đối tượng");
@@ -1573,6 +1574,7 @@ namespace WinApp
             topCards.Controls.Add(cardPrice, 1, 0);
             topCards.Controls.Add(cardPay, 2, 0);
 
+            // ===== THÔNG TIN =====
             PlaceLabel(cardInfo, "Loại khách", 16, 62);
             MoveControl(cb_loaikhach, cardInfo, 16, 88, 10);
             PlaceLabel(cardInfo, "Khách hàng", 16, 128);
@@ -1580,31 +1582,7 @@ namespace WinApp
             PlaceLabel(cardInfo, "Đối tượng", 16, 194);
             MoveControl(cb_doituong, cardInfo, 16, 220, 10);
 
-            PlaceLabel(cardPrice, "Đơn giá", 16, 62);
-            MoveControl(txtdongia, cardPrice, 16, 88, 10);
-            PlaceLabel(cardPrice, "Số lượng", 16, 128);
-            MoveControl(txtsoluong, cardPrice, 16, 154, 10);
-            PlaceLabel(cardPrice, "Khuyến mãi (%)", 16, 194);
-            MoveControl(txtkhuyenmai, cardPrice, 16, 220, 10);
-
-            PlaceLabel(cardPrice, "Tiền khuyến mãi", 16, 260);
-            txttienKM.Parent = cardPrice;
-            txttienKM.Location = new Point(16, 286);
-            txttienKM.Width = 10;
-
-            _lblKhachDua = new Label
-            {
-                Parent = cardPrice,
-                Text = "Khách đưa",
-                AutoSize = true,
-                ForeColor = _muted,
-                Font = F(10, true),
-                Location = new Point(16, 330)
-            };
-            txtkhachdua.Parent = cardPrice;
-            txtkhachdua.Location = new Point(16, 356);
-            txtkhachdua.Width = 10;
-
+            // ===== THANH TOÁN =====
             PlaceLabel(cardPay, "Thành tiền", 16, 62);
             MoveMoneyLabel(lblthanhtien, cardPay, 16, 90, _accent1, 18);
 
@@ -1614,8 +1592,23 @@ namespace WinApp
             PlaceLabel(cardPay, "Tiền thối", 16, 202);
             MoveMoneyLabel(lbltienthoi, cardPay, 16, 230, _text, 16);
 
-            PlaceLabel(cardPay, "Hình thức", 200, 62);
+            var lbHinhThuc = PlaceLabel(cardPay, "Hình thức", 200, 62);
             MoveControl(cb_hinhthuc, cardPay, 200, 88, 10);
+
+            // ===== BẢNG GIÁ: 2 cột + 1 dòng =====
+            txtdongia.Parent = cardPrice;
+            txtsoluong.Parent = cardPrice;
+            txtkhuyenmai.Parent = cardPrice;
+            txttienKM.Parent = cardPrice;
+            txtkhachdua.Parent = cardPrice;
+
+            var lbDonGia = PlaceLabel(cardPrice, "Đơn giá", 16, 62);
+            var lbSoLuong = PlaceLabel(cardPrice, "Số lượng", 16, 62);
+
+            var lbKhuyenMai = PlaceLabel(cardPrice, "Khuyến mãi (%)", 16, 62);
+            var lbTienKM = PlaceLabel(cardPrice, "Tiền khuyến mãi", 16, 62);
+
+            _lblKhachDua = PlaceLabel(cardPrice, "Khách đưa", 16, 62);
 
             ApplyComboBorders();
 
@@ -1635,15 +1628,13 @@ namespace WinApp
                 Font = F(9, true)
             };
 
-            // ✅ FIX CỨNG: reset Dock/Anchor trước khi wrap lại trong keypadCard
             cb_kieuin.Parent = keypadCard;
             cb_kieuin.DropDownStyle = ComboBoxStyle.DropDownList;
-            cb_kieuin.Dock = DockStyle.None;                 // ✅ quan trọng (tránh bung full width)
+            cb_kieuin.Dock = DockStyle.None;
             cb_kieuin.Anchor = AnchorStyles.Top | AnchorStyles.Left;
             cb_kieuin.Location = new Point(10, 10);
             cb_kieuin.Width = 200;
 
-            // ✅ wrap border đúng parent mới (keypadCard)
             WrapComboWithBorder(cb_kieuin);
 
             var keypadPanel = new TableLayoutPanel
@@ -1692,21 +1683,52 @@ namespace WinApp
 
             void RelayoutCards()
             {
+                // INFO
                 int wInfo = Math.Max(120, cardInfo.ClientSize.Width - 32);
                 ResizeComboBorder(cb_loaikhach, wInfo);
                 ResizeComboBorder(cb_khachhang, wInfo);
                 ResizeComboBorder(cb_doituong, wInfo);
 
-                int wPrice = Math.Max(120, cardPrice.ClientSize.Width - 32);
-                txtdongia.Width = wPrice;
-                txtsoluong.Width = wPrice;
-                txtkhuyenmai.Width = wPrice;
-                txttienKM.Width = wPrice;
-                txtkhachdua.Width = wPrice;
+                // PRICE 2 cột
+                int innerW = Math.Max(240, cardPrice.ClientSize.Width - 32);
+                int gap = 14;
+                int colW = Math.Max(120, (innerW - gap) / 2);
 
-                cb_hinhthuc.Width = Math.Max(120, cardPay.ClientSize.Width - (cardPay.ClientSize.Width / 2) - 16);
-                cb_hinhthuc.Left = Math.Max(160, cardPay.ClientSize.Width / 2);
+                int xL = 16;
+                int xR = 16 + colW + gap;
 
+                int yLabel1 = 62;
+                int yInput1 = 86;
+
+                int yLabel2 = 132;
+                int yInput2 = 156;
+
+                int yLabel3 = 202;
+                int yInput3 = 226;
+
+                lbDonGia.Location = new Point(xL, yLabel1);
+                lbSoLuong.Location = new Point(xR, yLabel1);
+
+                txtdongia.SetBounds(xL, yInput1, colW, INPUT_H);
+                txtsoluong.SetBounds(xR, yInput1, colW, INPUT_H);
+
+                lbKhuyenMai.Location = new Point(xL, yLabel2);
+                lbTienKM.Location = new Point(xR, yLabel2);
+
+                txtkhuyenmai.SetBounds(xL, yInput2, colW, INPUT_H);
+                txttienKM.SetBounds(xR, yInput2, colW, INPUT_H);
+
+                _lblKhachDua.Location = new Point(xL, yLabel3);
+                txtkhachdua.SetBounds(xL, yInput3, innerW, INPUT_H);
+
+                // PAY
+                int xPay = Math.Max(160, cardPay.ClientSize.Width / 2);
+                lbHinhThuc.Location = new Point(xPay, 62);
+
+                int wPay = Math.Max(160, cardPay.ClientSize.Width - xPay - 16);
+                MoveComboBorder(cb_hinhthuc, cardPay, xPay, 88, wPay);
+
+                // keypad
                 keypadPanel.Width = keypadCard.ClientSize.Width - 32;
 
                 int totalBlockH = groupBox3.Height + 18 + keypadPanel.Height;
@@ -1719,25 +1741,23 @@ namespace WinApp
                 keypadPanel.Left = 16;
                 keypadPanel.Top = groupBox3.Bottom + 18;
 
-                // ✅ KIEU IN: đặt đúng vị trí vàng (bên phải groupBox3, combo nằm dưới label)
+                int lift = 3;
+
                 int xKieuIn = groupBox3.Right + 24;
-                int yKieuIn = groupBox3.Top + 6;
+                int yKieuIn = groupBox3.Top + 6 - lift;
 
                 _lblKieuIn.Location = new Point(xKieuIn, yKieuIn);
 
                 int maxW = keypadCard.ClientSize.Width - xKieuIn - 16;
                 int wKieuIn = Math.Max(160, Math.Min(320, maxW));
 
-                int comboTop = _lblKieuIn.Bottom + 6;
-
-
+                int comboTop = _lblKieuIn.Bottom + 6 - lift;
                 MoveComboBorder(cb_kieuin, keypadCard, xKieuIn, comboTop, wKieuIn);
-
 
                 if (maxW < 170)
                 {
-                    _lblKieuIn.Location = new Point(16, groupBox3.Bottom + 10);
-                    MoveComboBorder(cb_kieuin, keypadCard, 16, _lblKieuIn.Bottom + 6, keypadCard.ClientSize.Width - 32);
+                    _lblKieuIn.Location = new Point(16, groupBox3.Bottom + 10 - lift);
+                    MoveComboBorder(cb_kieuin, keypadCard, 16, _lblKieuIn.Bottom + 6 - lift, keypadCard.ClientSize.Width - 32);
                 }
 
                 RelayoutUserFlow();
