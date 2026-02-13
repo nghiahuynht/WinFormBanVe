@@ -21,7 +21,17 @@ namespace WinApp
 {
     public partial class FormBanVe : Form
     {
-        private Panel _cartBadgeHost; 
+        private readonly Color _selectedRed = Color.FromArgb(255, 190, 190);
+        private readonly Color _selectedRedBorder = Color.FromArgb(239, 154, 154);
+        private string _selectedTicketCode = null;
+
+        private const string COL_RADIO = "col_radio";
+        private const string COL_CODE = "col_code";
+
+        private const int COMBO_BORDER_H = 42;
+        private const int COMBO_INNER_PAD_Y = 6;
+
+        private Panel _cartBadgeHost;
 
         internal Label CounterLabel => lblCounterCartNum;
         internal Panel LeftCardRef => _leftCardRef;
@@ -42,6 +52,7 @@ namespace WinApp
 
         private readonly Color _hoverBlue = Color.FromArgb(175, 215, 255);
         string imgsFolder = ConfigurationManager.AppSettings["ImageLibaryPath"];
+
         private sealed class GroupHeaderTag
         {
             public string GroupCode { get; set; }
@@ -101,11 +112,10 @@ namespace WinApp
             }));
         }
 
-       
         private void CounterCart()
         {
             int cartCount = lstItemCarts.Count;
-            lblCounterCartNum.Text = cartCount.ToString(); // bạn muốn 0 thì giữ 0
+            lblCounterCartNum.Text = cartCount.ToString();
 
             if (_cartBadgeHost == null) return;
 
@@ -114,7 +124,7 @@ namespace WinApp
 
             Size textSize = TextRenderer.MeasureText(lblCounterCartNum.Text, lblCounterCartNum.Font);
 
-            int h = Math.Max(34, textSize.Height + padY * 2 + 2);  // +2 chống cụt
+            int h = Math.Max(34, textSize.Height + padY * 2 + 2);
             int w = textSize.Width + padX * 2 + 2;
 
             w = Math.Max(h, w);
@@ -124,7 +134,7 @@ namespace WinApp
 
             lblCounterCartNum.Location = new Point(
                 (w - textSize.Width) / 2,
-                (h - textSize.Height) / 2 - 1 // kéo lên nhẹ chống chạm đáy
+                (h - textSize.Height) / 2 - 1
             );
         }
 
@@ -311,14 +321,13 @@ namespace WinApp
             gvMenu.ColumnHeadersDefaultCellStyle.SelectionBackColor = gvMenu.ColumnHeadersDefaultCellStyle.BackColor;
             gvMenu.ColumnHeadersDefaultCellStyle.SelectionForeColor = gvMenu.ColumnHeadersDefaultCellStyle.ForeColor;
 
-   
             gvMenu.DefaultCellStyle.Padding = new Padding(0, 4, 0, 4);
             gvMenu.RowTemplate.Height = 40;
 
             gvMenu.Columns.Clear();
             gvMenu.Columns.Add(new DataGridViewTextBoxColumn
             {
-                Name = "colCode",
+                Name = COL_CODE,
                 HeaderText = "Mã vé",
                 Width = 160
             });
@@ -343,19 +352,130 @@ namespace WinApp
             gvMenu.BringToFront();
             gvMenu.CellMouseEnter += GvMenu_CellMouseEnter;
             gvMenu.CellMouseLeave += GvMenu_CellMouseLeave;
+
+            gvMenu.CellPainting += gvMenu_CellPaintingRadioInCode;
+            gvMenu.CellClick += gvMenu_CellClickSelectTicketRadio;
         }
+
+        private void gvMenu_CellPaintingRadioInCode(object sender, DataGridViewCellPaintingEventArgs e)
+        {
+            if (e.RowIndex < 0 || e.ColumnIndex < 0) return;
+            if (gvMenu.Columns[e.ColumnIndex].Name != COL_CODE) return;
+
+            var row = gvMenu.Rows[e.RowIndex];
+            if (!(row.Tag is TicketModel ticket)) return;
+
+            string code = ticket.Code ?? "";
+            bool isChecked = (!string.IsNullOrWhiteSpace(code) && _selectedTicketCode == code);
+
+            e.PaintBackground(e.CellBounds, true);
+            e.Paint(e.CellBounds, DataGridViewPaintParts.Border);
+
+            Rectangle r = e.CellBounds;
+            int radioSize = Math.Min(16, r.Height - 10);
+            if (radioSize < 10) radioSize = 10;
+
+            int radioX = r.Left + 8;
+            int radioY = r.Top + (r.Height - radioSize) / 2;
+
+            var outer = new Rectangle(radioX, radioY, radioSize, radioSize);
+
+            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+
+            using (var pen = new Pen(Color.DodgerBlue, 2))
+                e.Graphics.DrawEllipse(pen, outer);
+
+            if (isChecked)
+            {
+                int innerSize = (int)(radioSize * 0.55);
+                var inner = new Rectangle(
+                    radioX + (radioSize - innerSize) / 2,
+                    radioY + (radioSize - innerSize) / 2,
+                    innerSize,
+                    innerSize
+                );
+                using (var b = new SolidBrush(Color.DodgerBlue))
+                    e.Graphics.FillEllipse(b, inner);
+            }
+
+            string text = code;
+            int leftPad = 8 + radioSize + 8;
+            var textRect = new Rectangle(r.Left + leftPad, r.Top, r.Width - leftPad - 6, r.Height);
+
+            TextRenderer.DrawText(
+                e.Graphics,
+                text,
+                e.CellStyle.Font,
+                textRect,
+                e.CellStyle.ForeColor,
+                TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis
+            );
+
+            e.Handled = true;
+        }
+
+        private void gvMenu_CellClickSelectTicketRadio(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0) return;
+
+            var row = gvMenu.Rows[e.RowIndex];
+            if (!(row.Tag is TicketModel ticket)) return;
+
+            string code = ticket.Code ?? "";
+            if (string.IsNullOrWhiteSpace(code)) return;
+
+            _selectedTicketCode = code;
+            gvMenu.ClearSelection();
+
+            // reset nền các dòng vé
+            foreach (DataGridViewRow r in gvMenu.Rows)
+            {
+                if (r.Tag is TicketModel)
+                {
+                    r.DefaultCellStyle.BackColor = Color.White;
+                    r.DefaultCellStyle.SelectionBackColor = _selectedRed;
+                    r.DefaultCellStyle.SelectionForeColor = _text;
+                }
+            }
+
+            // select + tô đỏ nhạt dòng hiện tại
+            row.Selected = true;
+            row.DefaultCellStyle.BackColor = _selectedRed;
+            row.DefaultCellStyle.SelectionBackColor = _selectedRed;
+            row.DefaultCellStyle.SelectionForeColor = _text;
+
+            gvMenu.Invalidate();
+
+            _ticketDangChon = laythongtinve(code);
+
+            if (_ticketDangChon != null)
+            {
+                decimal giaVeFromBangGia = PriceSaleFromPolicy();
+                txtdongia.Text = giaVeFromBangGia.ToString("N0");
+            }
+            else
+            {
+                txtdongia.Text = "";
+            }
+
+            txtkhuyenmai.Enabled = true;
+            txtsoluong.Enabled = true;
+            cb_hinhthuc.Enabled = true;
+            txtkhachdua.Enabled = true;
+
+            gvMenu.Invalidate();
+        }
+
         private void GvMenu_CellMouseEnter(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex < 0) return;
 
             var row = gvMenu.Rows[e.RowIndex];
-            if (!(row.Tag is TicketModel)) return; // chỉ hover row vé
+            if (!(row.Tag is TicketModel)) return;
 
             _hoverRowIndex = e.RowIndex;
 
-            // nếu đang selected thì để selection xử lý (đỡ “đá” màu chọn)
             if (row.Selected) return;
-
             row.DefaultCellStyle.BackColor = _hoverBlue;
         }
 
@@ -366,14 +486,12 @@ namespace WinApp
 
             var row = gvMenu.Rows[_hoverRowIndex];
 
-            // chỉ reset với row vé
             if (row.Tag is TicketModel)
             {
                 if (!row.Selected)
-                {
-                    // trả về nền mặc định của grid (bạn đang nền trắng)
                     row.DefaultCellStyle.BackColor = Color.White;
-                }
+                else
+                    row.DefaultCellStyle.BackColor = _selectedRed; // ✅ giữ đỏ nếu đang chọn
             }
 
             _hoverRowIndex = -1;
@@ -689,7 +807,6 @@ namespace WinApp
             ApplyThemePalette();
         }
 
-
         private void ApplyThemePalette()
         {
             if (_coffeeMode)
@@ -732,7 +849,6 @@ namespace WinApp
             {
                 lblCounterCartNum.BackColor = Color.Transparent;
                 lblCounterCartNum.Visible = true;
-                // ❌ KHÔNG set ForeColor = Color.Red ở đây nữa
             }
 
             ApplyModernStyles();
@@ -788,18 +904,38 @@ namespace WinApp
             gvMenu.GridColor = _border;
             gvMenu.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(241, 245, 249);
             gvMenu.ColumnHeadersDefaultCellStyle.ForeColor = _text;
-            gvMenu.DefaultCellStyle.SelectionBackColor = Color.FromArgb(235, 230, 225);
+            gvMenu.DefaultCellStyle.SelectionBackColor = _selectedRed; // ✅ đỏ nhẹ
             gvMenu.DefaultCellStyle.SelectionForeColor = _text;
 
+            // chặn header bị đổi màu
+            gvMenu.ColumnHeadersDefaultCellStyle.SelectionBackColor = gvMenu.ColumnHeadersDefaultCellStyle.BackColor;
+            gvMenu.ColumnHeadersDefaultCellStyle.SelectionForeColor = gvMenu.ColumnHeadersDefaultCellStyle.ForeColor;
+
+
             lblthanhtien.ForeColor = _accent1;
+
+            // ✅ +1 size cho "LOẠI ĐƠN" (GroupBox + radios)
+            StyleLoaiDonGroup();
         }
 
+        // ✅ +1 size combo text cho khu THÔNG TIN/BẢNG GIÁ/THANH TOÁN
         private void StyleCombo(ComboBox cb)
         {
             cb.FlatStyle = FlatStyle.Flat;
-            cb.Font = F(10, false);
+            cb.Font = F(11, false); // ✅ 10 -> 11
             cb.BackColor = Color.White;
             cb.ForeColor = _text;
+        }
+
+        private void ResizeComboBorder(ComboBox cb, int width)
+        {
+            if (cb?.Parent == null) return;
+            var inner = cb.Parent;
+            var border = inner.Parent as Panel;
+            if (border == null || border.Tag?.ToString() != "cb_border") return;
+
+            border.Width = width;
+            border.Height = COMBO_BORDER_H;
         }
 
         private void StyleNumeric(NumericUpDown n)
@@ -846,6 +982,7 @@ namespace WinApp
             b.Font = F(11, true);
         }
 
+        // ✅ +1 size cho Title/SubTitle các card: THÔNG TIN / BẢNG GIÁ / THANH TOÁN / (và các card khác)
         private Panel CreateCard(string title, string subtitle)
         {
             var card = new CardPanel
@@ -864,7 +1001,7 @@ namespace WinApp
                 Parent = card,
                 AutoSize = true,
                 Text = title,
-                Font = F(11, true),
+                Font = F(12, true),      // ✅ 11 -> 12
                 ForeColor = _text,
                 Location = new Point(16, 14)
             };
@@ -874,7 +1011,7 @@ namespace WinApp
                 Parent = card,
                 AutoSize = true,
                 Text = subtitle,
-                Font = F(9, false),
+                Font = F(10, false),     // ✅ 9 -> 10
                 ForeColor = _muted,
                 Location = new Point(16, 38)
             };
@@ -882,6 +1019,7 @@ namespace WinApp
             return card;
         }
 
+        // ✅ +1 size cho label con trong card (Loại khách/Khách hàng/Đối tượng…)
         private void PlaceLabel(Control parent, string text, int x, int y)
         {
             _ = new Label
@@ -890,16 +1028,70 @@ namespace WinApp
                 Text = text,
                 AutoSize = true,
                 ForeColor = _muted,
-                Font = F(9, true),
+                Font = F(10, true),      // ✅ 9 -> 10
                 Location = new Point(x, y)
             };
         }
 
+        private void WrapComboWithBorder(ComboBox cb)
+        {
+            if (cb == null) return;
+
+            if (cb.Parent != null && cb.Parent.Tag?.ToString() == "cb_inner") return;
+
+            var parent = cb.Parent;
+            var loc = cb.Location;
+            var size = cb.Size;
+            var anchor = cb.Anchor;
+
+            var border = new Panel
+            {
+                Parent = parent,
+                Location = loc,
+                Size = new Size(size.Width, COMBO_BORDER_H),
+                Anchor = anchor,
+                BackColor = _border,
+                Padding = new Padding(1),
+                Tag = "cb_border"
+            };
+
+            var inner = new Panel
+            {
+                Parent = border,
+                Dock = DockStyle.Fill,
+                BackColor = Color.White,
+                Padding = new Padding(8, COMBO_INNER_PAD_Y, 8, COMBO_INNER_PAD_Y),
+                Tag = "cb_inner"
+            };
+
+            cb.Parent = inner;
+            cb.Dock = DockStyle.Fill;
+
+            cb.FlatStyle = FlatStyle.Flat;
+            cb.BackColor = Color.White;
+            cb.IntegralHeight = false;
+        }
+
+        private void ApplyComboBorders()
+        {
+            WrapComboWithBorder(cb_loaikhach);
+            WrapComboWithBorder(cb_khachhang);
+            WrapComboWithBorder(cb_doituong);
+            WrapComboWithBorder(cb_hinhthuc);
+            WrapComboWithBorder(cb_kieuin);
+        }
+
         private void MoveControl(Control c, Control parent, int x, int y, int width)
         {
+            if (c == null || parent == null) return;
+
             c.Parent = parent;
             c.Location = new Point(x, y);
-            c.Width = width;
+
+            if (width <= 20)
+                c.Width = Math.Max(120, parent.ClientSize.Width - x - 16);
+            else
+                c.Width = width;
         }
 
         private void MoveMoneyLabel(Label lb, Control parent, int x, int y, Color color, float fontSize)
@@ -917,6 +1109,26 @@ namespace WinApp
             p.Controls.Add(b, col, row);
             b.Dock = DockStyle.Fill;
             b.Margin = new Padding(10);
+        }
+
+        // ✅ +1 size cho "LOẠI ĐƠN" (GroupBox + radios)
+        private void StyleLoaiDonGroup()
+        {
+            if (groupBox3 == null) return;
+
+            groupBox3.Font = F(11, true);  // ✅ title groupbox +1
+            groupBox3.ForeColor = _text;
+
+            if (rad_binhthuong != null)
+            {
+                rad_binhthuong.Font = F(11, false); // ✅ +1
+                rad_binhthuong.ForeColor = _text;
+            }
+            if (rad_mienphi != null)
+            {
+                rad_mienphi.Font = F(11, false);    // ✅ +1
+                rad_mienphi.ForeColor = _text;
+            }
         }
 
         private class GradientPanel : Panel
@@ -1032,8 +1244,6 @@ namespace WinApp
             ResetFormInput();
         }
 
-
-
         private void BuildModernCardLayout()
         {
             if (_mainGrid != null) return;
@@ -1076,7 +1286,6 @@ namespace WinApp
             headerGrid.Controls.Add(midHeader, 1, 0);
             headerGrid.Controls.Add(rightHeader, 2, 0);
 
-            // GAMAN
             if (label9 != null)
             {
                 label9.Parent = leftHeader;
@@ -1088,7 +1297,6 @@ namespace WinApp
                 label9.BringToFront();
             }
 
-            // Radio tone
             if (rad_xanh != null)
             {
                 rad_xanh.Parent = leftHeader;
@@ -1108,7 +1316,6 @@ namespace WinApp
                 rad_nau.BringToFront();
             }
 
-            // Title giữa
             if (label1 != null)
             {
                 label1.Parent = midHeader;
@@ -1122,7 +1329,6 @@ namespace WinApp
                 label1.BringToFront();
             }
 
-            // ================= RIGHT HEADER =================
             var userFlow = new FlowLayoutPanel
             {
                 Parent = rightHeader,
@@ -1240,7 +1446,6 @@ namespace WinApp
             leftCard.Dock = DockStyle.Fill;
             _mainGrid.Controls.Add(leftCard, 0, 0);
 
-            // Icon giỏ hàng
             if (pictureBox1 != null)
             {
                 pictureBox1.Parent = leftCard;
@@ -1250,7 +1455,6 @@ namespace WinApp
                 pictureBox1.BringToFront();
             }
 
-            // Đẩy title/subtitle qua phải cho khỏi icon
             var lblTitle = leftCard.Controls.OfType<Label>().FirstOrDefault(l => l.Text == "GIỎ HÀNG / ĐƠN ĐANG BÁN");
             var lblSub = leftCard.Controls.OfType<Label>().FirstOrDefault(l => l.Text == "Chọn vé bên dưới");
             if (lblTitle != null) lblTitle.Location = new Point(52, 14);
@@ -1268,7 +1472,6 @@ namespace WinApp
                 Location = new Point(16, 60)
             };
 
-            // ================= ✅✅✅ BADGE PILL FIX (KHÔNG CỤT CHỮ) =================
             if (_cartBadgeHost == null)
             {
                 _cartBadgeHost = new Panel
@@ -1296,9 +1499,8 @@ namespace WinApp
             }
 
             lblCounterCartNum.Parent = _cartBadgeHost;
-            lblCounterCartNum.AutoSize = true; // ✅ quan trọng
+            lblCounterCartNum.AutoSize = true;
             lblCounterCartNum.BackColor = Color.Transparent;
-            //lblCounterCartNum.ForeColor = _coffeeMode ? Color.FromArgb(111, 78, 55) : Color.FromArgb(29, 78, 216);
             lblCounterCartNum.ForeColor = Color.FromArgb(220, 38, 38);
             lblCounterCartNum.Font = F(13, true);
             lblCounterCartNum.TextAlign = ContentAlignment.MiddleCenter;
@@ -1315,23 +1517,20 @@ namespace WinApp
 
             leftCard.Resize += (s, e) => RelayoutCartBadge();
 
-            CounterCart();        // ✅ resize + canh chữ ngay
-            RelayoutCartBadge();  // ✅ bám góc phải ngay
+            CounterCart();
+            RelayoutCartBadge();
 
-            // Grid vé
-            // Grid vé + Logo
             int gridTop = 92;
             const int logoH = 56;
             const int logoGap = 10;
 
             gvMenu.Parent = leftCard;
             gvMenu.Location = new Point(16, gridTop);
-            gvMenu.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right; // bỏ Bottom để mình tự tính chiều cao
+            gvMenu.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
 
             int gridH = leftCard.ClientSize.Height - (gridTop + logoGap + logoH + 16);
             gvMenu.Size = new Size(leftCard.ClientSize.Width - 32, Math.Max(120, gridH));
 
-            // ===== LOGO (pictureBox2) đặt dưới danh sách vé =====
             if (pictureBox2 != null)
             {
                 pictureBox2.Parent = leftCard;
@@ -1348,8 +1547,6 @@ namespace WinApp
                 );
                 pictureBox2.BringToFront();
             }
-
-
 
             // ================= RIGHT STACK =================
             var rightStack = new TableLayoutPanel
@@ -1376,6 +1573,7 @@ namespace WinApp
             topCards.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 30f));
             rightStack.Controls.Add(topCards, 0, 0);
 
+            // ✅ CreateCard đã +1 size title/subtitle => THÔNG TIN / BẢNG GIÁ / THANH TOÁN tự tăng
             var cardInfo = CreateCard("THÔNG TIN", "Loại khách / Khách hàng / Đối tượng");
             var cardPrice = CreateCard("BẢNG GIÁ", "Đơn giá / Số lượng / Khuyến mãi");
             var cardPay = CreateCard("THANH TOÁN", "Tổng tiền & tiền thối");
@@ -1412,7 +1610,7 @@ namespace WinApp
                 Text = "Khách đưa",
                 AutoSize = true,
                 ForeColor = _muted,
-                Font = F(9, true),
+                Font = F(10, true), // ✅ +1 cho label này luôn (9 -> 10)
                 Location = new Point(16, 330)
             };
             txtkhachdua.Parent = cardPrice;
@@ -1431,7 +1629,8 @@ namespace WinApp
             PlaceLabel(cardPay, "Hình thức", 200, 62);
             MoveControl(cb_hinhthuc, cardPay, 200, 88, 10);
 
-            // ================= KEYPAD CARD =================
+            ApplyComboBorders();
+
             var keypadCard = CreateCard("NHẬP SỐ", "Bàn phím số lượng");
             keypadCard.Dock = DockStyle.Fill;
             rightStack.Controls.Add(keypadCard, 0, 1);
@@ -1495,13 +1694,12 @@ namespace WinApp
             nutxemdon.Dock = DockStyle.Fill;
             nutxemdon.Margin = new Padding(10);
 
-            // ================= RESIZE RELAYOUT =================
             void RelayoutCards()
             {
                 int wInfo = Math.Max(120, cardInfo.ClientSize.Width - 32);
-                cb_loaikhach.Width = wInfo;
-                cb_khachhang.Width = wInfo;
-                cb_doituong.Width = wInfo;
+                ResizeComboBorder(cb_loaikhach, wInfo);
+                ResizeComboBorder(cb_khachhang, wInfo);
+                ResizeComboBorder(cb_doituong, wInfo);
 
                 int wPrice = Math.Max(120, cardPrice.ClientSize.Width - 32);
                 txtdongia.Width = wPrice;
@@ -1513,24 +1711,21 @@ namespace WinApp
                 cb_hinhthuc.Width = Math.Max(120, cardPay.ClientSize.Width - (cardPay.ClientSize.Width / 2) - 16);
                 cb_hinhthuc.Left = Math.Max(160, cardPay.ClientSize.Width / 2);
 
-                // ================= LEFT CARD: Grid + Logo (pictureBox2) =================
                 int gridTopLocal = 92;
 
-                const int logoH2 = 200;   // ✅ chiều cao logo 200px
-                const int logoGap2 = 10;  // khoảng cách giữa grid và logo
-                const int sidePad = 16;   // padding trái/phải trong card
+                const int logoH2 = 200;
+                const int logoGap2 = 10;
+                const int sidePad = 16;
 
-                // Grid cao = card height - (top + gap + logo + bottom pad)
                 int gridH2 = leftCard.ClientSize.Height - (gridTopLocal + logoGap2 + logoH2 + sidePad);
                 gvMenu.Size = new Size(leftCard.ClientSize.Width - sidePad * 2, Math.Max(120, gridH2));
                 gvMenu.Location = new Point(sidePad, gridTopLocal);
 
                 if (pictureBox2 != null)
                 {
-                    pictureBox2.Parent = leftCard; // ✅ đảm bảo nằm trong leftCard
+                    pictureBox2.Parent = leftCard;
                     pictureBox2.Visible = true;
 
-                    // ✅ ngang bằng "các loại vé" (bằng gvMenu)
                     pictureBox2.SizeMode = PictureBoxSizeMode.Zoom;
                     pictureBox2.BackColor = Color.Transparent;
                     pictureBox2.Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;
@@ -1545,10 +1740,8 @@ namespace WinApp
                     pictureBox2.BringToFront();
                 }
 
-                // badge bám góc phải
                 RelayoutCartBadge();
 
-                // ================= RIGHT: keypad layout =================
                 keypadPanel.Width = keypadCard.ClientSize.Width - 32;
 
                 int totalBlockH = groupBox3.Height + 18 + keypadPanel.Height;
@@ -1652,7 +1845,6 @@ namespace WinApp
             try
             {
                 ClearLoginFile();
-                // Tạo lại service đúng ctor của LoginForm
                 var context = new SQLAdoContext();
                 IUserInfoService userInfoService = new UserInfoService(context);
                 IProductService productService = new ProductService(context);
@@ -1666,8 +1858,6 @@ namespace WinApp
             {
                 MessageBox.Show("Không thể đăng xuất: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-
-
         }
 
         private void nutxemdon_Click(object sender, EventArgs e)
@@ -1675,7 +1865,6 @@ namespace WinApp
             CartViewerForm viewCart = new CartViewerForm(lstItemCarts, _ticketOrderService);
             viewCart.FormClosed += viewCartForm_FormClosed;
             viewCart.ShowDialog();
-
         }
 
         public static void ClearLoginFile()
@@ -1695,7 +1884,6 @@ namespace WinApp
             }
         }
 
-
         private void GetListPricePolicy()
         {
             LstPricePolicy = _ticketService.GetListPricePolicy().data;
@@ -1710,11 +1898,8 @@ namespace WinApp
             var priceObject = LstPricePolicy.Where(x => x.TicketCode == ticketCode
             && x.CustomerType == customerType
             && x.CustomerForm == doituong).FirstOrDefault();
+
             return (priceObject != null ? priceObject.Price : 0);
-
         }
-
-
-
     }
 }
