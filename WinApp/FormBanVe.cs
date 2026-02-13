@@ -21,7 +21,7 @@ namespace WinApp
 {
     public partial class FormBanVe : Form
     {
-        private Panel _cartBadgeHost; // ✅ giữ nguyên field này
+        private Panel _cartBadgeHost; 
 
         internal Label CounterLabel => lblCounterCartNum;
         internal Panel LeftCardRef => _leftCardRef;
@@ -41,6 +41,7 @@ namespace WinApp
         private int _hoverRowIndex = -1;
 
         private readonly Color _hoverBlue = Color.FromArgb(175, 215, 255);
+        string imgsFolder = ConfigurationManager.AppSettings["ImageLibaryPath"];
         private sealed class GroupHeaderTag
         {
             public string GroupCode { get; set; }
@@ -88,7 +89,7 @@ namespace WinApp
             CounterCart();
             GetListPricePolicy();
 
-            lbltendangnhap.Text = FormBanVe.AuthenInfo().userName.ToString();
+            lbltendangnhap.Text = AuthenInfo().userName;
         }
 
         private void FormBanVe_Shown(object sender, EventArgs e)
@@ -100,7 +101,7 @@ namespace WinApp
             }));
         }
 
-        // ✅✅✅ CHỈ THAY ĐOẠN NÀY: CounterCart (fix cụt chữ + pill auto fit theo chữ)
+       
         private void CounterCart()
         {
             int cartCount = lstItemCarts.Count;
@@ -1032,7 +1033,7 @@ namespace WinApp
         }
 
 
-        // ✅✅✅ CHỈ THAY ĐOẠN NÀY: BuildModernCardLayout (đoạn badge)
+
         private void BuildModernCardLayout()
         {
             if (_mainGrid != null) return;
@@ -1191,7 +1192,8 @@ namespace WinApp
 
                 if (picus.Image == null)
                 {
-                    try { picus.Image = Properties.Resources.user_244; } catch { }
+                    string imgIconPath = Path.Combine(imgsFolder, "user-244.png");
+                    try { picus.ImageLocation = imgIconPath; } catch { }
                 }
             }
 
