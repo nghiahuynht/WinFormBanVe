@@ -82,6 +82,7 @@
             lblCounterCartNum = new Label();
             lbltendangnhap = new Label();
             picus = new PictureBox();
+            pictureBox2 = new PictureBox();
             groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             groupBox2.SuspendLayout();
@@ -91,6 +92,7 @@
             ((System.ComponentModel.ISupportInitialize)txtdongia).BeginInit();
             ((System.ComponentModel.ISupportInitialize)txtsoluong).BeginInit();
             ((System.ComponentModel.ISupportInitialize)picus).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)pictureBox2).BeginInit();
             SuspendLayout();
             // 
             // label1
@@ -708,11 +710,22 @@
             picus.TabStop = false;
             picus.Click += picus_Click;
             // 
+            // pictureBox2
+            // 
+            pictureBox2.Image = (Image)resources.GetObject("pictureBox2.Image");
+            pictureBox2.Location = new Point(326, 9);
+            pictureBox2.Name = "pictureBox2";
+            pictureBox2.Size = new Size(144, 66);
+            pictureBox2.SizeMode = PictureBoxSizeMode.StretchImage;
+            pictureBox2.TabIndex = 7;
+            pictureBox2.TabStop = false;
+            // 
             // FormBanVe
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1316, 726);
+            Controls.Add(pictureBox2);
             Controls.Add(picus);
             Controls.Add(lbltendangnhap);
             Controls.Add(lblCounterCartNum);
@@ -734,6 +747,7 @@
             ((System.ComponentModel.ISupportInitialize)txtdongia).EndInit();
             ((System.ComponentModel.ISupportInitialize)txtsoluong).EndInit();
             ((System.ComponentModel.ISupportInitialize)picus).EndInit();
+            ((System.ComponentModel.ISupportInitialize)pictureBox2).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -793,5 +807,6 @@
         private Label lblCounterCartNum;
         private Label lbltendangnhap;
         private PictureBox picus;
+        private PictureBox pictureBox2;
     }
 }
