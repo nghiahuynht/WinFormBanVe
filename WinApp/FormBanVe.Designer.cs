@@ -454,6 +454,7 @@
             cb_doituong.Name = "cb_doituong";
             cb_doituong.Size = new Size(150, 28);
             cb_doituong.TabIndex = 18;
+            cb_doituong.SelectedIndexChanged += cb_doituong_SelectedIndexChanged;
             // 
             // cb_khachhang
             // 
@@ -470,6 +471,7 @@
             cb_loaikhach.Name = "cb_loaikhach";
             cb_loaikhach.Size = new Size(150, 28);
             cb_loaikhach.TabIndex = 16;
+            cb_loaikhach.SelectedIndexChanged += cb_loaikhach_SelectedIndexChanged;
             // 
             // lbldoituong
             // 

@@ -1878,15 +1878,37 @@ namespace WinApp
 
         private decimal PriceSaleFromPolicy()
         {
-            string ticketCode = _ticketDangChon.Code;
+            string ticketCode = _ticketDangChon != null?_ticketDangChon.Code:"";
             string customerType = cb_loaikhach.SelectedValue != null ? cb_loaikhach.SelectedValue.ToString() : string.Empty;
             string doituong = cb_doituong.SelectedValue != null ? cb_doituong.SelectedValue.ToString() : string.Empty;
 
             var priceObject = LstPricePolicy.Where(x => x.TicketCode == ticketCode
             && x.CustomerType == customerType
             && x.CustomerForm == doituong).FirstOrDefault();
+            decimal gia = (priceObject != null ? priceObject.Price : 0);
+            txtdongia.Text = gia.ToString("N0");
+            return gia;
+        }
 
-            return (priceObject != null ? priceObject.Price : 0);
+        private void cb_loaikhach_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (cb_loaikhach.SelectedValue != null)
+            {
+                PriceSaleFromPolicy();
+                TinhTongBill();
+            }
+           
+        }
+
+        private void cb_doituong_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (cb_doituong.SelectedValue != null)
+            {
+                PriceSaleFromPolicy();
+                TinhTongBill();
+            }
+
+          
         }
     }
 }
