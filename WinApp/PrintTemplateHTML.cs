@@ -23,6 +23,7 @@ namespace WinApp
             string itemHtml = "";
             int soluong = (inGop == true ? header.Quanti : 1);
             decimal total = (inGop == true ? header.Total : header.Price);
+            string bangChu = "";
             if (header.DiscountPercent > 0)
             {
                 ;
@@ -34,6 +35,7 @@ namespace WinApp
                     tienKM = tienKM + " (" + phanTramKM + "%)";
                 }
                 string tienSauKM = header.TotalAfterDiscounted.ToString();
+                bangChu = Helper.TienBangChu(tienSauKM.ToString());
                 itemHtml += "<tr><td colspan='2'><strong>Tổng tiền:</strong><td style='text-align:right;'><strong>" + total.ToString("N0") + "</strong></td></tr>";
                 itemHtml += "<tr><td colspan='2'><strong>Khuyến mãi:</strong><td style='text-align:right;'><strong>" + tienKM + "</strong></td></tr>";
                 itemHtml += "<tr><td colspan='2'><strong>Tổng cần thanh toán:</strong></td><td style='text-align:right;'><strong>" + tienSauKM + "</strong></td></tr>";
@@ -42,6 +44,7 @@ namespace WinApp
 
             Bitmap qrCode = CreateQRCode(subId.ToString());
             string qrCodeByte64 = BitmapToBase64(qrCode);
+            bangChu = Helper.TienBangChu(total.ToString());
             string simpleHtml = @"<html>" +
                 "<body style='margin:0;padding:0;font-size:16pt;'>" +
                     "<table style='width:430px;border-bottom:1px solid #000;margin-top:10px;'>" +
@@ -63,7 +66,7 @@ namespace WinApp
                             "<td>"+ total.ToString("N0") + "</td>" +
                         "</tr>" +
                          "<tr>" +
-                            "<td colspan='3'>(Hai trăm tám mươi nghìn đồng)</td>" +
+                            "<td colspan='3'>"+ bangChu + "</td>" +
                         "</tr>" +
                          "<tr>" +
                             "<td colspan='3'>Ngày: "+ DateTime.Now.ToString("dd/MM/yyyy hh:mm tt") + "</td>" +
