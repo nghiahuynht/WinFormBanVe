@@ -22,11 +22,22 @@ namespace WinApp
 
             string itemHtml = "";
             int soluong = (inGop == true ? header.Quanti : 1);
+           
             decimal total = (inGop == true ? header.Total : header.Price);
+            string priceString = header.Price.ToString("N0");
+            string totalString = total.ToString("N0");
             string bangChu = "";
+
+            if (header.CustomerType == "LuHanh")
+            {
+                priceString = string.Empty;
+                totalString = string.Empty;
+                bangChu = string.Empty;
+            }
+
             if (header.DiscountPercent > 0)
             {
-                ;
+     
                 itemHtml = "<table style='width:430px;border-collapse:collapse;' border='1'  >";
                 string phanTramKM = header.DiscountPercent.ToString() + "%";
                 string tienKM = header.DiscountedAmount.ToString();
@@ -61,9 +72,9 @@ namespace WinApp
                             "<th>Thành tiền</th>" +
                         "</tr>" +
                         "<tr>" +
-                            "<td>"+ header.Price.ToString("N0") + "</td>" +
+                            "<td>"+ priceString + "</td>" +
                             "<td>"+ soluong + "</td>" +
-                            "<td>"+ total.ToString("N0") + "</td>" +
+                            "<td>"+ totalString + "</td>" +
                         "</tr>" +
                          "<tr>" +
                             "<td colspan='3'>"+ bangChu + "</td>" +

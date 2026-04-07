@@ -12,6 +12,7 @@ namespace GM_DAL.Models.TicketOrder
         public string TicketCode { get; set; }
         public string CustomerCode { get; set; }
         public string CustomerName { get; set; }
+        public string CustomerType { get; set; }
         public decimal Price { get; set; }
         public int Quanti { get; set; }
         public decimal Total { get; set; }
