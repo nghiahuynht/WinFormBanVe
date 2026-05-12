@@ -419,6 +419,9 @@ namespace WinApp
             }
             else // in lẻ
             {
+                // Nội dung 1 vé InLe (header + bảng giá + tiền bằng chữ + QR + link tra cứu + footer)
+                // dài ~135mm — nếu để 120mm sẽ tràn sang trang 2, máy in nhiệt cắt giữa chừng.
+                doc.GlobalSettings.PaperSize.Height = "200mm";
                 foreach (var subITem in lstItems)
                 {
                     string htmlBill = "";
