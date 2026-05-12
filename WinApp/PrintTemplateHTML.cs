@@ -13,12 +13,12 @@ namespace WinApp
     public static class PrintTemplateHTML
     {
         public static string imgsFolder = ConfigurationManager.AppSettings["ImageLibaryPath"];
+        public static string qrFolder = ConfigurationManager.AppSettings["QrFolder"];
         public static string linkTraCuu = ConfigurationManager.AppSettings["LinkTraCuu"];
         public static string generateHTMLBill(TicketOrderHeaderModel header, long subId, string subCode,bool inGop)
         {
 
             string folderPath = imgsFolder.Replace('\\', '/');
-            string fullImagePathLogo = $"file:///{folderPath}/logo-langbian-land.jpg";
 
             string itemHtml = "";
             int soluong = (inGop == true ? header.Quanti : 1);
@@ -57,15 +57,18 @@ namespace WinApp
             string qrCodeByte64 = BitmapToBase64(qrCode);
             bangChu = Helper.TienBangChu(total.ToString());
             string simpleHtml = @"<html>" +
-                "<body style='margin:0;padding:0;font-size:16pt;'>" +
+                "<body style='margin:5;padding:5;font-size:14pt;font-family:Arial;'>" +
                     "<table style='width:430px;border-bottom:1px solid #000;margin-top:10px;'>" +
                         "<tr>" +
-                            "<td width='50px' style='text-align:center;font-weight:bold;padding:5px;'><img src='" + fullImagePathLogo + "' style='width:100%;'></td>" +
-                             "<td width='150px' style='text-align:left;font-weight:bold'>MST: 5801503332 <br/> Hotline: 0923519519<br/>93A Bidoup, phường Langbiang - Đà Lạt</td>" +
+                             "<td width='200px' style='text-align:left;'>" +
+                                 "<span style='font-size:14pt;'>MST: 5801503332</span> <br/> " +
+                                 "<span style='font-size:14pt;'>Hotline: 0923519519</span><br/>" +
+                                 "<span style='font-size:14pt;'>93A Bidoup, phường Langbiang - Đà Lạt</span>" +
+                             "</td>" +
                         "</tr>" +
                     "</table>" +
-                    "<div style='text-align:center;margin-top:10px;'><span>Loại vé: " + header.TicketCode + "</span></div>" +
-                    "<table style='width:430px;text-align:center;font-size:16pt;'>" +
+                    "<div style='text-align:center;margin-top:10px;font-size:18pt;'><span>Loại vé: " + header.TicketCode + "</span></div>" +
+                    "<table style='width:430px;text-align:center;font-size:14pt;'>" +
                          "<tr>" +
                             "<th>Đơn Giá</th>" +
                             "<th>Số lượng</th>" +
@@ -85,8 +88,8 @@ namespace WinApp
                          "<tr>" +
                             "<td colspan='3'><strong>(Vé chỉ có giá trị sử dụng trong ngày)</strong></td>" +
                         "</tr>" +
-                     "</table><br/>" + itemHtml + "<hr/>" +
-                      "<table style='width:430px;font-size:16pt;'>" +
+                     "</table><br/>" + itemHtml +
+                      "<table style='width:430px;font-size:14pt;'>" +
                            "<tr>" +
                                 "<td><img src='data:image/png;base64," + qrCodeByte64 + "' style='width:35mm;border:1px solid #000;padding:1px;margin:1px;' /></td>" +
                                 "<td font-size:16pt;>" +
@@ -97,12 +100,12 @@ namespace WinApp
                                 "</td>" +
                            "</tr>" +
                       "</table>" +
-                     "<table style='text-align:center;margin-top:3px;font-size:16pt;'>" +
+                     "<table style='text-align:center;margin-top:3px;font-size:14pt;'>" +
                            "<tr>" +
-                                "<td>Vé đã mua có thể đổi ngày tham quan, nhưng không thể hoàn trả - chính sách đổi ngày vui lòng thông báo trước 24h.<br><i>The purchased ticket date can be change, but it is non refunable. Please notify us before at lease 24h if you want to change the visit date. </i></td>" +
+                                "<td>(Vé sử dụng trong ngày)</td>" +
                            "</tr>" +
                       "</table>" +
-                     "<div style='text-align:center;margin-top:3px;font-size:16pt;'>KÍNH CHÚC QUÝ KHÁCH VUI CHƠI VUI VẺ.</div>" +
+                     "<div style='text-align:center;margin-top:3px;font-size:14pt;'>KÍNH CHÚC QUÝ KHÁCH VUI CHƠI VUI VẺ.</div>" +
                 "</body>" +
             "</html>";
 
@@ -117,8 +120,8 @@ namespace WinApp
             Bitmap qrCode = CreateQRCode(subId.ToString());
             string qrCodeByte64 = BitmapToBase64(qrCode);
             string subHtml = @"<html>" +
-                "<body style='margin:0;padding:0;font-size:16pt;'>" +
-                      "<table style='width:430px;font-size:16pt;text-align:center'>" +
+                "<body style='margin:5;padding:5;font-size:16pt;'>" +
+                      "<table style='width:430px;font-size:16pt;text-align:center;margin-top:5px;'>" +
                            "<tr>" +
                                 "<td><img src='data:image/png;base64," + qrCodeByte64 + "' style='width:35mm;border:1px solid #000;padding:1px;margin:1px;' /></td>" +
                            "</tr>" +
@@ -138,18 +141,50 @@ namespace WinApp
         {
             using (QRCodeGenerator qrGenerator = new QRCodeGenerator())
             {
-                // Tạo dữ liệu mã QR với mức độ sửa lỗi M (Medium - 15%) 
-                // Mức M là tối ưu nhất cho máy in nhiệt
                 QRCodeData qrCodeData = qrGenerator.CreateQrCode(ticketId, QRCodeGenerator.ECCLevel.M);
 
                 using (QRCode qrCode = new QRCode(qrCodeData))
                 {
-                    // Số 20 là kích thước mỗi pixel trong mã QR, bạn có thể chỉnh để QR to/nhỏ
+
                     Bitmap qrCodeImage = qrCode.GetGraphic(20);
                     return qrCodeImage;
                 }
             }
         }
+
+
+        public static void CreateQRCodeAndSave(string ticketId, string folderPath)
+        {
+
+          //  string folderSave = folderPath.Replace('\\', '/');
+
+            using (QRCodeGenerator qrGenerator = new QRCodeGenerator())
+            {
+                QRCodeData qrCodeData = qrGenerator.CreateQrCode(ticketId, QRCodeGenerator.ECCLevel.M);
+
+                using (QRCode qrCode = new QRCode(qrCodeData))
+                {
+                    // Tạo Bitmap
+                    Bitmap qrCodeImage = qrCode.GetGraphic(20);
+
+                    // 1. Kiểm tra và tạo thư mục nếu chưa tồn tại
+                    if (!Directory.Exists(folderPath))
+                    {
+                        Directory.CreateDirectory(folderPath);
+                    }
+
+                    // 2. Tạo đường dẫn đầy đủ (ví dụ: D:\Tickets\QR_123.jpg)
+                    string fullPath = Path.Combine(folderPath, $"{ticketId}.jpg");
+
+                    // 3. Lưu xuống ổ cứng dưới dạng Jpeg
+                    qrCodeImage.Save(fullPath, System.Drawing.Imaging.ImageFormat.Jpeg);
+
+                }
+            }
+        }
+
+
+
 
         public static string BitmapToBase64(Bitmap bitmap)
         {

@@ -394,7 +394,7 @@ namespace WinApp
                 GlobalSettings = {
                     ColorMode = ColorMode.Color,
                     Orientation = DinkToPdf.Orientation.Portrait,
-                    PaperSize = new PechkinPaperSize("80mm", "125mm"),
+                    PaperSize = new PechkinPaperSize("80mm", "120mm"),
                     Margins = new MarginSettings { Top = 0.3, Left = 0.3, Right = 0.3, Bottom = 0.3 },
                 }
             };
@@ -420,7 +420,7 @@ namespace WinApp
                     HtmlContent = htmlBill, // Hàm trả về chuỗi HTML của 1 vé
                     WebSettings = { DefaultEncoding = "utf-8" }
                 };
-                doc.GlobalSettings.PaperSize.Height = "150mm";
+                doc.GlobalSettings.PaperSize.Height = "145mm";
                 doc.Objects.Add(page); // Thêm vé này vào danh sách đối tượng của tài liệu
             }
             else // in lẻ
