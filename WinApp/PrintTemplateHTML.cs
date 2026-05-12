@@ -38,7 +38,7 @@ namespace WinApp
             if (header.DiscountPercent > 0)
             {
      
-                itemHtml = "<table style='width:430px;border-collapse:collapse;' border='1'  >";
+                itemHtml = "<table style='width:320px;border-collapse:collapse;' border='1'  >";
                 string phanTramKM = header.DiscountPercent.ToString() + "%";
                 string tienKM = header.DiscountedAmount.ToString();
                 if (phanTramKM != "0")
@@ -57,22 +57,22 @@ namespace WinApp
             string qrCodeByte64 = BitmapToBase64(qrCode);
             bangChu = Helper.TienBangChu(total.ToString());
             string simpleHtml = @"<html>" +
-                "<body style='margin:5;padding:5;font-size:14pt;font-family:Arial;'>" +
-                    "<table style='width:430px;border-bottom:1px solid #000;margin-top:10px;'>" +
+                "<body style='margin:10px;padding:5px;font-size:12pt;font-family:Arial;border:1px solid #000000;'>" +
+                    "<table style='width:320px;border-bottom:1px solid #000;margin-top:10px;'>" +
                         "<tr>" +
                              "<td width='200px' style='text-align:left;'>" +
-                                 "<span style='font-size:14pt;'>MST: 5801503332</span> <br/> " +
-                                 "<span style='font-size:14pt;'>Hotline: 0923519519</span><br/>" +
-                                 "<span style='font-size:14pt;'>93A Bidoup, phường Langbiang - Đà Lạt</span>" +
+                                 "<span style='font-size:12pt;'>MST: 5801503332</span> <br/> " +
+                                 "<span style='font-size:12pt;'>Hotline: 0923519519</span><br/>" +
+                                 "<span style='font-size:12pt;'>93A Bidoup, phường Langbiang - Đà Lạt</span>" +
                              "</td>" +
                         "</tr>" +
                     "</table>" +
-                    "<div style='text-align:center;margin-top:10px;font-size:18pt;'><span>Loại vé: " + header.TicketCode + "</span></div>" +
-                    "<table style='width:430px;text-align:center;font-size:14pt;'>" +
+                    "<div style='text-align:center;margin-top:10px;font-size:12pt;'><span>Loại vé: " + header.TicketCode + "</span></div>" +
+                    "<table style='width:320px;text-align:center;font-size:12pt;'>" +
                          "<tr>" +
-                            "<th>Đơn Giá</th>" +
-                            "<th>Số lượng</th>" +
-                            "<th>Thành tiền</th>" +
+                            "<td>Đơn Giá</th>" +
+                            "<td>Số lượng</th>" +
+                            "<td>Thành tiền</th>" +
                         "</tr>" +
                         "<tr>" +
                             "<td>"+ priceString + "</td>" +
@@ -86,26 +86,26 @@ namespace WinApp
                             "<td colspan='3'>Ngày: "+ DateTime.Now.ToString("dd/MM/yyyy hh:mm tt") + "</td>" +
                         "</tr>" +
                          "<tr>" +
-                            "<td colspan='3'><strong>(Vé chỉ có giá trị sử dụng trong ngày)</strong></td>" +
+                            "<td colspan='3'>(Vé chỉ có giá trị sử dụng trong ngày)</td>" +
                         "</tr>" +
                      "</table><br/>" + itemHtml +
-                      "<table style='width:430px;font-size:14pt;'>" +
+                      "<table style='width:320px;font-size:12pt;'>" +
                            "<tr>" +
-                                "<td><img src='data:image/png;base64," + qrCodeByte64 + "' style='width:35mm;border:1px solid #000;padding:1px;margin:1px;' /></td>" +
-                                "<td font-size:16pt;>" +
-                                        "<strong>Mã đơn:</strong> " + header.Id + "<br/>" +
-                                        "<strong>Số vé:</strong> " + subId + "<br/>" +
-                                        "<strong>Mã tra cứu:</strong> " + subCode + "<br/>" +
-                                        "<strong>Link: </strong>" + linkTraCuu+
+                                "<td><img src='data:image/png;base64," + qrCodeByte64 + "' style='width:30mm;border:1px solid #000;padding:1px;' /></td>" +
+                                "<td font-size:12pt;>" +
+                                        "<span>Mã đơn:</span> " + header.Id + "<br/>" +
+                                        "<span>Số vé:</span> " + subId + "<br/>" +
+                                        "<span>Mã tra cứu:</span> " + subCode + "<br/>" +
+                                        "<span>Link: </span>" + linkTraCuu+
                                 "</td>" +
                            "</tr>" +
                       "</table>" +
-                     "<table style='text-align:center;margin-top:3px;font-size:14pt;'>" +
+                     "<table style='text-align:center;margin-top:3px;font-size:12pt;'>" +
                            "<tr>" +
                                 "<td>(Vé sử dụng trong ngày)</td>" +
                            "</tr>" +
                       "</table>" +
-                     "<div style='text-align:center;margin-top:3px;font-size:14pt;'>KÍNH CHÚC QUÝ KHÁCH VUI CHƠI VUI VẺ.</div>" +
+                     "<div style='text-align:center;margin-top:3px;font-size:10pt;'>KÍNH CHÚC QUÝ KHÁCH VUI CHƠI VUI VẺ.</div>" +
                 "</body>" +
             "</html>";
 
@@ -120,8 +120,8 @@ namespace WinApp
             Bitmap qrCode = CreateQRCode(subId.ToString());
             string qrCodeByte64 = BitmapToBase64(qrCode);
             string subHtml = @"<html>" +
-                "<body style='margin:5;padding:5;font-size:16pt;'>" +
-                      "<table style='width:430px;font-size:16pt;text-align:center;margin-top:5px;'>" +
+                "<body style='margin:5px;padding:5px;font-size:16pt;'>" +
+                      "<table style='width:320px;font-size:16pt;text-align:center;margin-top:5px;'>" +
                            "<tr>" +
                                 "<td><img src='data:image/png;base64," + qrCodeByte64 + "' style='width:35mm;border:1px solid #000;padding:1px;margin:1px;' /></td>" +
                            "</tr>" +

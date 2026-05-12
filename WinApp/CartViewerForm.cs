@@ -388,8 +388,8 @@ namespace WinApp
                 GlobalSettings = {
                     ColorMode = ColorMode.Color,
                     Orientation = DinkToPdf.Orientation.Portrait,
-                    PaperSize = new PechkinPaperSize("80mm", "120mm"),
-                    Margins = new MarginSettings { Top = 0.3, Left = 0.3, Right = 0.3, Bottom = 0.3 },
+                    PaperSize = new PechkinPaperSize("75mm", "100mm"),
+                    Margins = new MarginSettings { Top = 5, Left = 1, Right = 1, Bottom = 1 },
                 }
             };
 
@@ -421,7 +421,7 @@ namespace WinApp
             {
                 // Nội dung 1 vé InLe (header + bảng giá + tiền bằng chữ + QR + link tra cứu + footer)
                 // dài ~135mm — nếu để 120mm sẽ tràn sang trang 2, máy in nhiệt cắt giữa chừng.
-                doc.GlobalSettings.PaperSize.Height = "200mm";
+                doc.GlobalSettings.PaperSize.Height = "100mm";
                 foreach (var subITem in lstItems)
                 {
                     string htmlBill = "";
@@ -586,7 +586,7 @@ namespace WinApp
                 printDocument.PrintController = new StandardPrintController();
 
                 // Thiết lập lề bằng 0 - cực kỳ quan trọng đối với in vé/in nhiệt
-                printDocument.DefaultPageSettings.Margins = new Margins(0, 0, 0, 0);
+                printDocument.DefaultPageSettings.Margins = new Margins(3, 3, 3, 3);
                 printDocument.OriginAtMargins = false;
 
                 // 5. Bắn lệnh in xuống máy in
