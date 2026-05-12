@@ -319,16 +319,10 @@ namespace WinApp
 
                                 try
                                 {
-
-                                    await Task.Run(() =>
-                                    {
-                                        PrintOrder(Convert.ToInt64(newOrder.data.value));
-                                        Thread.Sleep(3000);
-                                    });
+                                    await PrintOrder(Convert.ToInt64(newOrder.data.value));
                                 }
                                 catch (Exception ex)
                                 {
-                                    fWait.Close();
                                     MessageBox.Show($"Lỗi trong quá trình in: {ex.Message}");
                                 }
                                 finally
@@ -378,7 +372,7 @@ namespace WinApp
 
 
 
-        private async void PrintOrder(long orderId)
+        private async Task PrintOrder(long orderId)
         {
             var headerOrder = await ticketOrderService.GetHeaderOrderById(orderId);
             var lstItems = new List<PrintModel>();
@@ -458,7 +452,7 @@ namespace WinApp
             }
 
             string savePath = Path.Combine(billPdfExportPath, orderId + ".pdf");
-            await Task.Run(async () =>
+            await Task.Run(() =>
             {
                 byte[] pdf = _converter.Convert(doc);
                 File.WriteAllBytes(savePath, pdf);
@@ -467,12 +461,7 @@ namespace WinApp
                 {
                     ThucHienIn(savePath, printerName);
                 }
-
             });
-
-
-
-
         }
 
 
@@ -538,16 +527,11 @@ namespace WinApp
             using (WaitingForm fWait = new WaitingForm())
             {
                 fWait.Show();
-               // fWait.Refresh(); // Vẽ lại giao diện ngay lập tức
+                fWait.Refresh();
 
                 try
                 {
-                   
-                    await Task.Run(() =>
-                    {
-                        PrintOrder(205974);
-                        Thread.Sleep(3000);
-                    });
+                    await PrintOrder(205974);
                 }
                 catch (Exception ex)
                 {
@@ -555,13 +539,9 @@ namespace WinApp
                 }
                 finally
                 {
-                    // 4. Đóng Form Waiting và mở lại nút bấm
                     fWait.Close();
                 }
             }
-
-
-
         }
 
 
@@ -574,6 +554,19 @@ namespace WinApp
                 if (!File.Exists(filePath))
                 {
                     MessageBox.Show($"Không tìm thấy file tại: {filePath}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                if (string.IsNullOrWhiteSpace(printerName))
+                {
+                    MessageBox.Show("Chưa cấu hình tên máy in trong app.config (PrinterName).", "Lỗi cấu hình", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                var installedPrinters = PrinterSettings.InstalledPrinters.Cast<string>().ToList();
+                if (!installedPrinters.Contains(printerName))
+                {
+                    MessageBox.Show($"Không tìm thấy máy in '{printerName}' trên máy này. Vui lòng kiểm tra cấu hình hoặc kết nối máy in.", "Lỗi máy in", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
 
