@@ -45,7 +45,7 @@ namespace WinApp
                 {
                     tienKM = tienKM + " (" + phanTramKM + "%)";
                 }
-                string tienSauKM = header.TotalAfterDiscounted.ToString();
+                string tienSauKM = header.CustomerType== "LuHanh"?"":header.TotalAfterDiscounted.ToString();
                 bangChu = Helper.TienBangChu(tienSauKM.ToString());
                 itemHtml += "<tr><td colspan='2'><strong>Tổng tiền:</strong><td style='text-align:right;'><strong>" + total.ToString("N0") + "</strong></td></tr>";
                 itemHtml += "<tr><td colspan='2'><strong>Khuyến mãi:</strong><td style='text-align:right;'><strong>" + tienKM + "</strong></td></tr>";
@@ -55,7 +55,7 @@ namespace WinApp
 
             Bitmap qrCode = CreateQRCode(subId.ToString());
             string qrCodeByte64 = BitmapToBase64(qrCode);
-            bangChu = Helper.TienBangChu(total.ToString());
+            bangChu = header.CustomerType == "LuHanh" ? "" : Helper.TienBangChu(total.ToString());
             string simpleHtml = @"<html>" +
                 "<body style='margin:10px;padding:5px;font-size:12pt;font-family:Arial;border:1px solid #000000;'>" +
                     "<table style='width:320px;border-bottom:1px solid #000;margin-top:10px;'>" +

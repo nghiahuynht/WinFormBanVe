@@ -319,7 +319,7 @@ namespace WinApp
 
                                 try
                                 {
-                                    await PrintOrder(Convert.ToInt64(newOrder.data.value));
+                                    await TaoFileVePDF(Convert.ToInt64(newOrder.data.value));
                                 }
                                 catch (Exception ex)
                                 {
@@ -372,7 +372,7 @@ namespace WinApp
 
 
 
-        private async Task PrintOrder(long orderId)
+        private async Task TaoFileVePDF(long orderId)
         {
             var headerOrder = await ticketOrderService.GetHeaderOrderById(orderId);
             var lstItems = new List<PrintModel>();
@@ -460,16 +460,51 @@ namespace WinApp
                 byte[] pdf = _converter.Convert(doc);
                 File.WriteAllBytes(savePath, pdf);
 
-                if (File.Exists(savePath))
+                int attempts = 0;
+
+                // Vòng lặp này sẽ check liên tục, nếu file ghi xong sớm (ví dụ mất 50ms) là nó thoát ra ngay để in luôn
+                // Chờ tối đa 30 lần (tương đương 3 giây) đề phòng ổ cứng bị nghẽn
+                while (!IsFileReady(savePath) && attempts < 30)
+                {
+                    Thread.Sleep(100); // Đợi 100ms rồi check lại
+                    attempts++;
+                }
+
+                // 3. Sau khi chắc chắn file đã sẵn sàng 100% và đã ĐÓNG, mới ra lệnh in
+                if (IsFileReady(savePath))
                 {
                     ThucHienIn(savePath, printerName);
+                }
+                else
+                {
+                    // Trường hợp quá 3 giây mà file vẫn lỗi hoặc không sẵn sàng
+                    Console.WriteLine($"Lỗi: File PDF {orderId}.pdf không sẵn sàng để in sau 3 giây.");
                 }
             });
         }
 
 
 
-        
+        private bool IsFileReady(string filename)
+        {
+            // Nếu file chưa tồn tại thì chắc chắn là chưa sẵn sàng
+            if (!File.Exists(filename)) return false;
+
+            try
+            {
+                // Thử mở file độc quyền để đọc. 
+                // Nếu file đang bị tiến trình WriteAllBytes chiếm giữ để ghi, dòng này sẽ quăng ngoại lệ (IOException)
+                using (FileStream stream = File.Open(filename, FileMode.Open, FileAccess.Read, FileShare.None))
+                {
+                    return stream.Length > 0; // File phải có dung lượng lớn hơn 0 byte mới gọi là xong
+                }
+            }
+            catch (IOException)
+            {
+                // File đang bị lock do đang ghi dở
+                return false;
+            }
+        }
 
 
 
@@ -534,7 +569,7 @@ namespace WinApp
 
                 try
                 {
-                    await PrintOrder(205974);
+                    await TaoFileVePDF(205974);
                 }
                 catch (Exception ex)
                 {
